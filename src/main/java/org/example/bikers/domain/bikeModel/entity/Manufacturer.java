@@ -1,4 +1,4 @@
-package org.example.bikers.bikeModel.entity;
+package org.example.bikers.domain.bikeModel.entity;
 
 public enum Manufacturer {
     HONDA,

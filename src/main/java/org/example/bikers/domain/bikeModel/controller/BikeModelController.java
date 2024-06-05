@@ -1,4 +1,4 @@
-package org.example.bikers.bikeModel.controller;
+package org.example.bikers.domain.bikeModel.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
