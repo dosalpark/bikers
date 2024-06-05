@@ -1,9 +1,9 @@
-package org.example.bikers.member.controller;
+package org.example.bikers.domain.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.member.dto.MemberSignupRequestDto;
-import org.example.bikers.member.service.MemberService;
+import org.example.bikers.domain.member.dto.MemberSignupRequestDto;
+import org.example.bikers.domain.member.service.MemberService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

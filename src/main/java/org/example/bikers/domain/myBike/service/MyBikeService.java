@@ -1,4 +1,4 @@
-package org.example.bikers.myBike.service;
+package org.example.bikers.domain.myBike.service;
 
 import org.springframework.stereotype.Service;
 

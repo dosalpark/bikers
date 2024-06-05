@@ -1,9 +1,9 @@
-package org.example.bikers.member.service;
+package org.example.bikers.domain.member.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.member.entity.Member;
-import org.example.bikers.member.repository.MemberRepository;
+import org.example.bikers.domain.member.repository.MemberRepository;
+import org.example.bikers.domain.member.entity.Member;
 import org.springframework.stereotype.Service;
 
 @Service

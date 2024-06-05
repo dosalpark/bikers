@@ -1,4 +1,4 @@
-package org.example.bikers.bikeModel.entity;
+package org.example.bikers.domain.bikeModel.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
