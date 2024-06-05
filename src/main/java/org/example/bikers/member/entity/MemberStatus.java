@@ -1,6 +1,6 @@
 package org.example.bikers.member.entity;
 
-public enum MemeberStatus {
+public enum MemberStatus {
     NORMAL,
     DELETE,
 }
