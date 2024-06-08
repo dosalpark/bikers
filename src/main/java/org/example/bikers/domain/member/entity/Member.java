@@ -32,16 +32,21 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private MemberStatus status;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private MemberRole memberRole;
+
     @Column
     private String image;
 
     @Column
     private LocalDateTime createdAt;
 
-    public Member(String email, String password) {
+    public Member(String email, String password, MemberRole memberRole) {
         this.email = email;
         this.password = password;
         this.status = MemberStatus.NORMAL;
+        this.memberRole = memberRole;
         this.createdAt = LocalDateTime.now();
     }
 }
