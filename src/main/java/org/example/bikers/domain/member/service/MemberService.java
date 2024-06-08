@@ -2,8 +2,9 @@ package org.example.bikers.domain.member.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.member.repository.MemberRepository;
 import org.example.bikers.domain.member.entity.Member;
+import org.example.bikers.domain.member.entity.MemberRole;
+import org.example.bikers.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +21,7 @@ public class MemberService {
         if (member.isPresent()) {
             throw new IllegalArgumentException("Email 중복");
         }
-        Member newMember = new Member(email, password);
+        Member newMember = new Member(email, password, MemberRole.USER);
         memberRepository.save(newMember);
 
         return "success";
