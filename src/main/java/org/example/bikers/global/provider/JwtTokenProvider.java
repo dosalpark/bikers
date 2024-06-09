@@ -1,6 +1,7 @@
 package org.example.bikers.global.provider;
 
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -63,5 +64,9 @@ public class JwtTokenProvider {
                  ExpiredJwtException e) {
             return false;
         }
+    }
+
+    public Claims getUserInfoFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 }
