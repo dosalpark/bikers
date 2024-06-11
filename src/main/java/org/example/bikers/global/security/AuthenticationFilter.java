@@ -21,7 +21,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     public AuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
-        setFilterProcessesUrl("/members/login");
+        setFilterProcessesUrl("/v1/members/login");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
         HttpServletResponse response, FilterChain filterChain, Authentication authentication)
         throws IOException {
-        Member member = (Member) authentication.getPrincipal();
+        Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
         String token = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
 
         ObjectNode statusMsg = new ObjectMapper().createObjectNode();

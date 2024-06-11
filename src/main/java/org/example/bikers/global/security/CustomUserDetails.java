@@ -2,12 +2,14 @@ package org.example.bikers.global.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import lombok.Getter;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+@Getter
 public class CustomUserDetails implements UserDetails {
 
     private final Member member;
@@ -36,5 +38,25 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return member.getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
