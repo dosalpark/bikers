@@ -50,6 +50,12 @@ public class BikeModelController {
     }
 
     //모델 전체조회
+    @GetMapping
+    public ResponseEntity<CommonResponseDto<List<BikeModelGetResponseDto>>> getBikeModels(){
+        List<BikeModelGetResponseDto> responseDtoList = bikeModelService.getBikeModels();
+        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDtoList));
+    }
+
 
     //모델 수정
 

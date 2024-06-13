@@ -1,5 +1,7 @@
 package org.example.bikers.domain.bikeModel.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
@@ -46,6 +48,15 @@ public class BikeModelService {
         return converterToDto(getModel);
     }
 
+    @Transactional(readOnly = true)
+    public List<BikeModelGetResponseDto> getBikeModels() {
+        List<BikeModel> getModels = bikeModelRepository.findAll();
+        if(getModels.isEmpty()){
+            throw new IllegalArgumentException("조회 할 바이크모델이 없습니다.");
+        }
+        return converterToDtoList(getModels);
+    }
+
     private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
         return BikeModelGetResponseDto.builder()
             .bikeModelId(getModel.getId())
@@ -55,6 +66,23 @@ public class BikeModelService {
             .bikeCategory(String.valueOf(getModel.getBikeCategory()))
             .displacement(getModel.getDisplacement())
             .build();
+    }
+
+    private List<BikeModelGetResponseDto> converterToDtoList(List<BikeModel> getModels) {
+        List<BikeModelGetResponseDto> responseDtoList = new ArrayList<>();
+
+        for (BikeModel getModel : getModels) {
+            BikeModelGetResponseDto responseDto = BikeModelGetResponseDto.builder()
+                .bikeModelId(getModel.getId())
+                .manufacturer(String.valueOf(getModel.getManufacturer()))
+                .name(getModel.getName())
+                .year(getModel.getYear())
+                .bikeCategory(String.valueOf(getModel.getBikeCategory()))
+                .displacement(getModel.getDisplacement())
+                .build();
+            responseDtoList.add(responseDto);
+        }
+        return responseDtoList;
     }
 
     private boolean isValidBikeCategory(String bikeCategory) {
