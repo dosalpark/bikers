@@ -1,6 +1,7 @@
 package org.example.bikers.domain.bikeModel.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelCreateRequestDto;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
@@ -42,7 +43,7 @@ public class BikeModelController {
 
     //모델 조회
     @GetMapping("/{bikeModelId}")
-    public ResponseEntity<CommonResponseDto<BikeModelGetResponseDto>> getBikeModel(
+    public ResponseEntity<CommonResponseDto<BikeModelGetResponseDto>> getBikeModelById(
         @PathVariable Long bikeModelId) {
         BikeModelGetResponseDto responseDto = bikeModelService.getBikeModelById(bikeModelId);
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDto));
