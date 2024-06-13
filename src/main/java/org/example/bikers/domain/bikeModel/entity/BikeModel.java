@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bikeModels")
@@ -27,7 +28,16 @@ public class BikeModel {
     @Column(nullable = false)
     private int year;
 
-    @Column
-    private boolean discontinued;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BikeCategory bikeCategory;
 
+    @Column(nullable = false)
+    private int displacement;
+
+    @Column(nullable = false)
+    private Long addUserId;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 }
