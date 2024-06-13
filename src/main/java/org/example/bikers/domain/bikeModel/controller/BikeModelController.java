@@ -3,11 +3,15 @@ package org.example.bikers.domain.bikeModel.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelCreateRequestDto;
+import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.service.BikeModelService;
+import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,8 +40,13 @@ public class BikeModelController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-
     //모델 조회
+    @GetMapping("/{bikeModelId}")
+    public ResponseEntity<CommonResponseDto<BikeModelGetResponseDto>> getBikeModel(
+        @PathVariable Long bikeModelId) {
+        BikeModelGetResponseDto responseDto = bikeModelService.getBikeModelById(bikeModelId);
+        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDto));
+    }
 
     //모델 전체조회
 

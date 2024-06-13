@@ -1,6 +1,7 @@
 package org.example.bikers.domain.bikeModel.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
@@ -13,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BikeModelService {
 
     private final BikeModelRepository bikeModelRepository;
-
 
     @Transactional
     public void createBikeModel(
@@ -36,6 +36,25 @@ public class BikeModelService {
         BikeModel newModel = new BikeModel(manufacturer, name, year, bikeCategory, displacement,
             userId);
         bikeModelRepository.save(newModel);
+    }
+
+    @Transactional(readOnly = true)
+    public BikeModelGetResponseDto getBikeModelById(Long bikeModelId) {
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new IllegalArgumentException("해당하는 바이크모델이 없습니다.")
+        );
+        return converterToDto(getModel);
+    }
+
+    private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
+        return BikeModelGetResponseDto.builder()
+            .bikeModelId(getModel.getId())
+            .manufacturer(String.valueOf(getModel.getManufacturer()))
+            .name(getModel.getName())
+            .year(getModel.getYear())
+            .bikeCategory(String.valueOf(getModel.getBikeCategory()))
+            .displacement(getModel.getDisplacement())
+            .build();
     }
 
     private boolean isValidBikeCategory(String bikeCategory) {
