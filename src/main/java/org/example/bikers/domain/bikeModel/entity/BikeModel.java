@@ -8,9 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @Table(name = "bikeModels")
+@NoArgsConstructor
 public class BikeModel {
 
     @Id
@@ -27,7 +32,27 @@ public class BikeModel {
     @Column(nullable = false)
     private int year;
 
-    @Column
-    private boolean discontinued;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BikeCategory bikeCategory;
 
+    @Column(nullable = false)
+    private int displacement;
+
+    @Column(nullable = false)
+    private Long addUserId;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    public BikeModel(String manufacturer, String name, int year, String bikeCategory,
+        int displacement, Long addUserId) {
+        this.manufacturer = Manufacturer.valueOf(manufacturer);
+        this.name = name;
+        this.year = year;
+        this.bikeCategory = BikeCategory.valueOf(bikeCategory);
+        this.displacement = displacement;
+        this.addUserId = addUserId;
+        this.createdAt = LocalDateTime.now();
+    }
 }
