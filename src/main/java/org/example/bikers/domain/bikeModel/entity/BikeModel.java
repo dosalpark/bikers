@@ -9,9 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "bikeModels")
+@NoArgsConstructor
 public class BikeModel {
 
     @Id
@@ -40,4 +42,15 @@ public class BikeModel {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    public BikeModel(String manufacturer, String name, int year, String bikeCategory,
+        int displacement, Long addUserId) {
+        this.manufacturer = Manufacturer.valueOf(manufacturer);
+        this.name = name;
+        this.year = year;
+        this.bikeCategory = BikeCategory.valueOf(bikeCategory);
+        this.displacement = displacement;
+        this.addUserId = addUserId;
+        this.createdAt = LocalDateTime.now();
+    }
 }
