@@ -79,9 +79,9 @@ public class WebSecurityConfig {
                 .requestMatchers("/v1/members/**").permitAll()
                 .anyRequest().authenticated()
         );
-        httpSecurity.addFilterBefore(authorizationFilter(), AuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationFilter(),
             UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(authorizationFilter(), AuthenticationFilter.class);
 
         return httpSecurity.build();
 
