@@ -1,13 +1,16 @@
 package org.example.bikers.domain.bikeModel.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelCreateRequestDto;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.service.BikeModelService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -51,9 +54,12 @@ public class BikeModelController {
 
     //모델 전체조회
     @GetMapping
-    public ResponseEntity<CommonResponseDto<List<BikeModelGetResponseDto>>> getBikeModels(){
-        List<BikeModelGetResponseDto> responseDtoList = bikeModelService.getBikeModels();
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDtoList));
+    public ResponseEntity<CommonResponseDto<Slice<BikeModelGetResponseDto>>> getBikeModels(
+        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        Slice<BikeModelGetResponseDto> responseDtoList = bikeModelService.getBikeModels(pageable);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(CommonResponseDto.success(responseDtoList));
     }
 
 
