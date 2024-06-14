@@ -1,9 +1,11 @@
 package org.example.bikers.global.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.lang.Strings;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.repository.MemberRepository;
+import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,20 +54,14 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-        } catch (SecurityException e) {
-            response.sendError(401, "토큰 서명 검증 실패");
-            return;
-        } catch (MalformedJwtException e) {
-            response.sendError(401, "토큰 형식 오류");
-            return;
-        } catch (ExpiredJwtException e) {
-            response.sendError(401, "만료 토큰 사용");
-            return;
-        } catch (Exception e) {
-            response.sendError(401, "인증 실패");
+        } catch (SecurityException | MalformedJwtException | ExpiredJwtException |
+                 SignatureException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                CommonResponseDto.fail("400", "토큰이 유효하지 않습니다.")));
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 }

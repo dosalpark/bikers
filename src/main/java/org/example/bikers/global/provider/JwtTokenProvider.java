@@ -2,9 +2,7 @@ package org.example.bikers.global.provider;
 
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -33,16 +31,16 @@ public class JwtTokenProvider {
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         byte[] bytes = Base64.getDecoder().decode(secretToken);
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createAccessToken(Long userId, String email){
+    public String createAccessToken(Long userId, String email) {
         Date date = new Date();
         return BEARER_PREFIX + Jwts.builder()
             .claim("userId", userId)
-            .claim("email",email)
+            .claim("email", email)
             .setExpiration(new Date(date.getTime() + TOKEN_TIME))
             .signWith(key, signatureAlgorithm)
             .compact();
@@ -57,13 +55,8 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException |
-                 ExpiredJwtException e) {
-            return false;
-        }
+        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+        return true;
     }
 
     public Claims getUserInfoFromToken(String token) {
