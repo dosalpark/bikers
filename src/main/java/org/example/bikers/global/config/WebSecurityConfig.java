@@ -2,6 +2,7 @@ package org.example.bikers.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.repository.MemberRepository;
+import org.example.bikers.global.exception.CustomAccessDeniedHandler;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.example.bikers.global.security.AuthenticationFilter;
 import org.example.bikers.global.security.AuthorizationFilter;
@@ -18,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -51,6 +53,11 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -72,11 +79,12 @@ public class WebSecurityConfig {
                 .requestMatchers("/v1/members/**").permitAll()
                 .anyRequest().authenticated()
         );
-        httpSecurity.addFilterBefore(authorizationFilter(), AuthenticationFilter.class);
         httpSecurity.addFilterBefore(authenticationFilter(),
             UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterAfter(authorizationFilter(), AuthenticationFilter.class);
 
         return httpSecurity.build();
+
     }
 
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
