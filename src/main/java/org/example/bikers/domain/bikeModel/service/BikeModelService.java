@@ -1,5 +1,10 @@
 package org.example.bikers.domain.bikeModel.service;
 
+import static org.example.bikers.global.exception.ErrorCode.NO_BIKE_MODEL_FOUND;
+import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_CATEGORY;
+import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_MANUFACTURER;
+import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE_MODEL;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +13,7 @@ import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 import org.example.bikers.domain.bikeModel.repository.BikeModelRepository;
+import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +32,13 @@ public class BikeModelService {
         String bikeCategory,
         int displacement) {
         if (!isValidManufacturer(manufacturer)) {
-            throw new IllegalArgumentException("일치하는 제조사가 없습니다.");
+            throw new NotFoundException(NO_MATCHING_MANUFACTURER);
         }
         if (!isValidBikeCategory(bikeCategory)) {
-            throw new IllegalArgumentException("일치하는 카테고리가 없습니다.");
+            throw new NotFoundException(NO_MATCHING_CATEGORY);
         }
         if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEquals(name, year)) {
-            throw new IllegalArgumentException("이미 등록된 모델입니다.");
+            throw new IllegalArgumentException("BM000003");
         }
 
         BikeModel newModel = new BikeModel(manufacturer, name, year, bikeCategory, displacement,
@@ -43,7 +49,7 @@ public class BikeModelService {
     @Transactional(readOnly = true)
     public BikeModelGetResponseDto getBikeModelById(Long bikeModelId) {
         BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
-            () -> new IllegalArgumentException("해당하는 바이크모델이 없습니다.")
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
         );
         return converterToDto(getModel);
     }
@@ -51,8 +57,8 @@ public class BikeModelService {
     @Transactional(readOnly = true)
     public List<BikeModelGetResponseDto> getBikeModels() {
         List<BikeModel> getModels = bikeModelRepository.findAll();
-        if(getModels.isEmpty()){
-            throw new IllegalArgumentException("조회 할 바이크모델이 없습니다.");
+        if (getModels.isEmpty()) {
+            throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
         return converterToDtoList(getModels);
     }
