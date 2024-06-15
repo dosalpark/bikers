@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
+import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 import org.example.bikers.domain.bikeModel.repository.BikeModelRepository;
 import org.example.bikers.global.exception.customException.NotFoundException;
@@ -56,6 +57,15 @@ public class BikeModelService {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
         return converterToDtoSlice(getModels, pageable);
+    }
+
+    @Transactional
+    public void deleteBikeModel(Long bikeModelId) {
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
+        );
+        getModel.delete();
+        bikeModelRepository.save(getModel);
     }
 
     private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
