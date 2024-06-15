@@ -35,6 +35,7 @@ public class BikeModelService {
         }
         if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEqualsAndBikeModelStatusEquals(
             name, year, BikeModelStatus.NORMAL)) {
+            throw new IllegalArgumentException("BM000003");
         }
 
         BikeModel newModel = new BikeModel(manufacturer, name, year, bikeCategory, displacement,
@@ -47,7 +48,7 @@ public class BikeModelService {
         BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
             () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
         );
-        if(getModel.getBikeModelStatus() == BikeModelStatus.DELETE){
+        if (getModel.getBikeModelStatus() == BikeModelStatus.DELETE) {
             throw new NotFoundException(NO_SUCH_BIKE_MODEL);
         }
         return converterToDto(getModel);
@@ -60,6 +61,29 @@ public class BikeModelService {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
         return converterToDtoSlice(getModels, pageable);
+    }
+
+    @Transactional
+    public void updateBikeModel(Long bikeModelId, Long userId, String manufacturer, String name,
+        int year,
+        String bikeCategory, int displacement) {
+
+        if (!isValidManufacturer(manufacturer)) {
+            throw new NotFoundException(NO_MATCHING_MANUFACTURER);
+        }
+        if (!isValidBikeCategory(bikeCategory)) {
+            throw new NotFoundException(NO_MATCHING_CATEGORY);
+        }
+        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEqualsAndBikeModelStatusEquals(
+            name, year, BikeModelStatus.NORMAL)) {
+            throw new IllegalArgumentException("BM000003");
+        }
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
+        );
+        getModel.update(userId, manufacturer, name, year, bikeCategory, displacement);
+        bikeModelRepository.save(getModel);
+
     }
 
     @Transactional

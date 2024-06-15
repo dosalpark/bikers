@@ -42,6 +42,9 @@ public class BikeModel {
     @Column(nullable = false)
     private Long addUserId;
 
+    @Column
+    private Long updateUserId;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BikeModelStatus bikeModelStatus;
@@ -62,6 +65,17 @@ public class BikeModel {
         this.addUserId = addUserId;
         this.bikeModelStatus = BikeModelStatus.NORMAL;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void update(Long userId, String manufacturer, String name, int year, String bikeCategory,
+        int displacement) {
+        this.manufacturer = Manufacturer.valueOf(manufacturer);
+        this.name = name;
+        this.year = year;
+        this.bikeCategory = BikeCategory.valueOf(bikeCategory);
+        this.displacement = displacement;
+        this.updateUserId = userId;
+        this.modifiedAt = LocalDateTime.now();
     }
 
     public void delete() {
