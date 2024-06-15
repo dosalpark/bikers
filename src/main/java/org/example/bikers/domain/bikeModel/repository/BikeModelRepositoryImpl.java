@@ -21,7 +21,8 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<BikeModel> cq = cb.createQuery(BikeModel.class);
 
-        TypedQuery<BikeModel> query = entityManager.createQuery("SELECT bm FROM BikeModel bm",
+        TypedQuery<BikeModel> query = entityManager.createQuery(
+            "SELECT bm FROM BikeModel bm WHERE bm.bikeModelStatus = 'NORMAL' ",
             cq.getResultType());
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize() + 1);

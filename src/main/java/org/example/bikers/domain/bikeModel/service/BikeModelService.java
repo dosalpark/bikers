@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
+import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 import org.example.bikers.domain.bikeModel.repository.BikeModelRepository;
 import org.example.bikers.global.exception.customException.NotFoundException;
@@ -32,7 +33,8 @@ public class BikeModelService {
         if (!isValidBikeCategory(bikeCategory)) {
             throw new NotFoundException(NO_MATCHING_CATEGORY);
         }
-        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEquals(name, year)) {
+        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEqualsAndBikeModelStatusEquals(
+            name, year, BikeModelStatus.NORMAL)) {
             throw new IllegalArgumentException("BM000003");
         }
 
@@ -46,6 +48,9 @@ public class BikeModelService {
         BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
             () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
         );
+        if (getModel.getBikeModelStatus() == BikeModelStatus.DELETE) {
+            throw new NotFoundException(NO_SUCH_BIKE_MODEL);
+        }
         return converterToDto(getModel);
     }
 
@@ -55,7 +60,39 @@ public class BikeModelService {
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
-        return converterToDtoSlice(getModels, pageable);
+        return converterToDtoSlice(getModels);
+    }
+
+    @Transactional
+    public void updateBikeModel(Long bikeModelId, Long userId, String manufacturer, String name,
+        int year,
+        String bikeCategory, int displacement) {
+
+        if (!isValidManufacturer(manufacturer)) {
+            throw new NotFoundException(NO_MATCHING_MANUFACTURER);
+        }
+        if (!isValidBikeCategory(bikeCategory)) {
+            throw new NotFoundException(NO_MATCHING_CATEGORY);
+        }
+        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEqualsAndBikeModelStatusEquals(
+            name, year, BikeModelStatus.NORMAL)) {
+            throw new IllegalArgumentException("BM000003");
+        }
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
+        );
+        getModel.update(userId, manufacturer, name, year, bikeCategory, displacement);
+        bikeModelRepository.save(getModel);
+
+    }
+
+    @Transactional
+    public void deleteBikeModel(Long bikeModelId) {
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
+        );
+        getModel.delete();
+        bikeModelRepository.save(getModel);
     }
 
     private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
@@ -69,8 +106,7 @@ public class BikeModelService {
             .build();
     }
 
-    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels,
-        Pageable pageable) {
+    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels) {
         return getModels.map(getModel -> BikeModelGetResponseDto.builder()
             .bikeModelId(getModel.getId())
             .manufacturer(String.valueOf(getModel.getManufacturer()))
