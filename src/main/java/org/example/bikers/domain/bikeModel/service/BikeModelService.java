@@ -60,7 +60,7 @@ public class BikeModelService {
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
-        return converterToDtoSlice(getModels, pageable);
+        return converterToDtoSlice(getModels);
     }
 
     @Transactional
@@ -106,8 +106,7 @@ public class BikeModelService {
             .build();
     }
 
-    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels,
-        Pageable pageable) {
+    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels) {
         return getModels.map(getModel -> BikeModelGetResponseDto.builder()
             .bikeModelId(getModel.getId())
             .manufacturer(String.valueOf(getModel.getManufacturer()))
