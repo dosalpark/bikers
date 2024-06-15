@@ -33,8 +33,8 @@ public class BikeModelService {
         if (!isValidBikeCategory(bikeCategory)) {
             throw new NotFoundException(NO_MATCHING_CATEGORY);
         }
-        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEquals(name, year)) {
-            throw new IllegalArgumentException("BM000003");
+        if (bikeModelRepository.existsBikeModelByNameEqualsAndYearEqualsAndBikeModelStatusEquals(
+            name, year, BikeModelStatus.NORMAL)) {
         }
 
         BikeModel newModel = new BikeModel(manufacturer, name, year, bikeCategory, displacement,
@@ -47,6 +47,9 @@ public class BikeModelService {
         BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
             () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
         );
+        if(getModel.getBikeModelStatus() == BikeModelStatus.DELETE){
+            throw new NotFoundException(NO_SUCH_BIKE_MODEL);
+        }
         return converterToDto(getModel);
     }
 
