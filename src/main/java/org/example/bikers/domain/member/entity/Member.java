@@ -49,4 +49,12 @@ public class Member {
         this.memberRole = memberRole;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void promote(){
+        this.memberRole = MemberRole.ADMIN;
+    }
+
+    public void delete() {
+        this.status = MemberStatus.DELETE;
+    }
 }
