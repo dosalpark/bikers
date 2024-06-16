@@ -2,8 +2,14 @@ package org.example.bikers.domain.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.member.dto.MemberPromoteRequestDto;
 import org.example.bikers.domain.member.dto.MemberSignupRequestDto;
 import org.example.bikers.domain.member.service.MemberService;
+import org.example.bikers.global.security.CustomUserDetails;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +23,19 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public String signUp(@Valid @RequestBody MemberSignupRequestDto requestDto) {
-        return memberService.singUp(
+    public ResponseEntity<Void> signUp(@Valid @RequestBody MemberSignupRequestDto requestDto) {
+        memberService.singUp(
             requestDto.getEmail(),
             requestDto.getPassword(),
             requestDto.getCheckPassword());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/promote")
+    public ResponseEntity<Void> promoteToAdmin(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @Valid @RequestBody MemberPromoteRequestDto requestDto) {
+        memberService.promoteToAdmin(userDetails.getMember().getId(), requestDto.getSecretKey());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
