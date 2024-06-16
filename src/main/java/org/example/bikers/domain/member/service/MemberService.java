@@ -11,6 +11,7 @@ import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,9 @@ public class MemberService {
 
     @Value("${admin.secret.token}")
     private String AdminSecretKey;
+    private final String deleteMessageCheck = "회원탈퇴";
 
+    @Transactional
     public void singUp(String email, String password, String checkPassword) {
         if (!password.equals(checkPassword)) {
             throw new IllegalArgumentException("패스워드 불일치");
@@ -34,14 +37,27 @@ public class MemberService {
         memberRepository.save(newMember);
     }
 
-    public void promoteToAdmin(Long userId, String secretKey) {
+    @Transactional
+    public void promoteToAdmin(Long memberId, String secretKey) {
         if (!AdminSecretKey.equals(secretKey)) {
             throw new IllegalArgumentException("secretKey 불일치");
         }
-        Member getMember = memberRepository.findById(userId).orElseThrow(() ->
+        Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
             new NotFoundException(NO_SUCH_MEMBER));
 
         getMember.promote();
+        memberRepository.save(getMember);
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId, String deleteMessage) {
+        if (!deleteMessageCheck.equals(deleteMessage)) {
+            throw new IllegalArgumentException("탈퇴하시려면 '회원탈퇴'를 정확히 입력해주세요");
+        }
+        Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_MEMBER));
+
+        getMember.delete();
         memberRepository.save(getMember);
     }
 }

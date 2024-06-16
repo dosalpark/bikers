@@ -53,4 +53,8 @@ public class Member {
     public void promote(){
         this.memberRole = MemberRole.ADMIN;
     }
+
+    public void delete() {
+        this.status = MemberStatus.DELETE;
+    }
 }
