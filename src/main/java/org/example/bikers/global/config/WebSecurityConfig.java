@@ -10,6 +10,7 @@ import org.example.bikers.global.security.CustomUserDetailsService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -77,8 +78,14 @@ public class WebSecurityConfig {
                 .permitAll()
                 .requestMatchers("/v1").permitAll()
                 .requestMatchers("/v1/members/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
                 .anyRequest().authenticated()
         );
+
+        httpSecurity.exceptionHandling(
+            exceptionHandling -> exceptionHandling.accessDeniedHandler(accessDeniedHandler()));
+
         httpSecurity.addFilterBefore(authenticationFilter(),
             UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterAfter(authorizationFilter(), AuthenticationFilter.class);

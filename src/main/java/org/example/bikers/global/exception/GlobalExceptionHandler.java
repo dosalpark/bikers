@@ -1,10 +1,13 @@
 package org.example.bikers.global.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -27,6 +30,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(CommonResponseDto.fail("400", ex.getMessage()));
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+        HttpServletRequest request) {
+        List<ObjectError> result = ex.getBindingResult().getAllErrors();
+        StringBuilder sb = new StringBuilder();
+        for (ObjectError objectError : result) {
+            sb.append(objectError.getDefaultMessage()).append("\n");
+        }
+        log.error("url: {}, msg: {}, \n Stacktrace", request.getRequestURI(), ex.getMessage(),
+            ex.fillInStackTrace());
+        return ResponseEntity.badRequest().body(CommonResponseDto.fail("400", sb.toString()));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity handleNotFoundException(NotFoundException ex,
         HttpServletRequest request) {
@@ -35,6 +51,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(Integer.parseInt(ex.getErrorCode().getHttpStatus())).body(
             CommonResponseDto.fail(ex.getErrorCode().getHttpStatus(), ex.getErrorCode().getMsg()));
     }
-
 
 }
