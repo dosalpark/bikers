@@ -1,11 +1,13 @@
 package org.example.bikers.domain.member.service;
 
+import static org.example.bikers.global.exception.ErrorCode.DELETED_MEMBER;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_MEMBER;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
+import org.example.bikers.domain.member.entity.MemberStatus;
 import org.example.bikers.domain.member.repository.MemberRepository;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,8 +44,7 @@ public class MemberService {
         if (!AdminSecretKey.equals(secretKey)) {
             throw new IllegalArgumentException("secretKey 불일치");
         }
-        Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_MEMBER));
+        Member getMember = findByMember(memberId);
 
         getMember.promote();
         memberRepository.save(getMember);
@@ -54,10 +55,18 @@ public class MemberService {
         if (!deleteMessageCheck.equals(deleteMessage)) {
             throw new IllegalArgumentException("탈퇴하시려면 '회원탈퇴'를 정확히 입력해주세요");
         }
-        Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_MEMBER));
+        Member getMember = findByMember(memberId);
 
         getMember.delete();
         memberRepository.save(getMember);
+    }
+
+    private Member findByMember(Long memberId) {
+        Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_MEMBER));
+        if (getMember.getStatus().equals(MemberStatus.DELETE)) {
+            throw new NotFoundException(DELETED_MEMBER);
+        }
+        return getMember;
     }
 }
