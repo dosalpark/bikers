@@ -53,8 +53,8 @@ public class Member {
         this.createdAt = LocalDateTime.now();
     }
 
-    public void promote(){
-        this.memberRole = MemberRole.ADMIN;
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
         this.modifiedAt = LocalDateTime.now();
     }
 
@@ -62,4 +62,10 @@ public class Member {
         this.status = MemberStatus.DELETE;
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public void promote() {
+        this.memberRole = MemberRole.ADMIN;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }

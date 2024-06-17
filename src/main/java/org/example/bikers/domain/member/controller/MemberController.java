@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.dto.MemberDeleteRequestDto;
 import org.example.bikers.domain.member.dto.MemberPromoteRequestDto;
 import org.example.bikers.domain.member.dto.MemberSignupRequestDto;
+import org.example.bikers.domain.member.dto.MemberUpdatePasswordRequestDto;
 import org.example.bikers.domain.member.service.MemberService;
 import org.example.bikers.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,18 @@ public class MemberController {
             requestDto.getPassword(),
             requestDto.getCheckPassword());
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> updateMemberByPassword(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @Valid @RequestBody MemberUpdatePasswordRequestDto requestDto) {
+        memberService.updateMemberByPassword(
+            userDetails.getMember().getId(),
+            requestDto.getOldPassword(),
+            requestDto.getNewPassword(),
+            requestDto.getChkNewPassword());
+        return ResponseEntity.status((HttpStatus.OK)).build();
     }
 
     @DeleteMapping
