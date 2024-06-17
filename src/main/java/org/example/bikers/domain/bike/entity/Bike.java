@@ -1,4 +1,4 @@
-package org.example.bikers.domain.myBike.entity;
+package org.example.bikers.domain.bike.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "myBikes")
-public class MyBike {
+@Table(name = "bikes")
+public class Bike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
