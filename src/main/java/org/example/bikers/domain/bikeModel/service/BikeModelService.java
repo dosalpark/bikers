@@ -95,6 +95,15 @@ public class BikeModelService {
         bikeModelRepository.save(getModel);
     }
 
+    @Transactional(readOnly = true)
+    public void validateByBikeModel(Long bikeModelId) {
+        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
+            () -> new NotFoundException(NO_SUCH_BIKE_MODEL));
+        if (getModel.getBikeModelStatus().equals(BikeModelStatus.DELETE)) {
+            throw new NotFoundException(NO_SUCH_BIKE_MODEL);
+        }
+    }
+
     private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
         return BikeModelGetResponseDto.builder()
             .bikeModelId(getModel.getId())
