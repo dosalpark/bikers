@@ -42,6 +42,9 @@ public class Member {
     @Column
     private LocalDateTime createdAt;
 
+    @Column
+    private LocalDateTime modifiedAt;
+
     public Member(String email, String password, MemberRole memberRole) {
         this.email = email;
         this.password = password;
@@ -50,11 +53,19 @@ public class Member {
         this.createdAt = LocalDateTime.now();
     }
 
-    public void promote(){
-        this.memberRole = MemberRole.ADMIN;
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+        this.modifiedAt = LocalDateTime.now();
     }
 
     public void delete() {
         this.status = MemberStatus.DELETE;
+        this.modifiedAt = LocalDateTime.now();
     }
+
+    public void promote() {
+        this.memberRole = MemberRole.ADMIN;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }
