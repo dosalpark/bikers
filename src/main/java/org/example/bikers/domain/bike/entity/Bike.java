@@ -69,4 +69,9 @@ public class Bike {
         this.status = BikeStatus.HOLD;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateMileage(int mileage) {
+        this.mileage = mileage;
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

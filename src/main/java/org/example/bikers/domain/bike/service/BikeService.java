@@ -54,6 +54,19 @@ public class BikeService {
         return converterToDtoList(getBikes);
     }
 
+    @Transactional
+    public void updateMyBikeMileage(Long memberId, Long bikeId, int mileage) {
+        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
+            bikeId, BikeStatus.DELETE).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_BIKE)
+        );
+        if(getBike.getMileage() >= mileage){
+            throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
+        }
+        getBike.updateMileage(mileage);
+        bikeRepository.save(getBike);
+    }
+
     private MyBikeGetResponseDto converterToDto(Bike getBike) {
         return MyBikeGetResponseDto.builder()
             .bikeId(getBike.getId())
