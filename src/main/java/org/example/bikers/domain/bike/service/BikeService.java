@@ -73,7 +73,7 @@ public class BikeService {
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE)
         );
-        getBike.sellBike(sellDate);
+        getBike.sell(sellDate);
         bikeRepository.save(getBike);
     }
 

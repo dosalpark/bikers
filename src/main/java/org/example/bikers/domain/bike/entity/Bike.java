@@ -75,7 +75,7 @@ public class Bike {
         this.modifiedAt = LocalDateTime.now();
     }
 
-    public void sellBike(LocalDate sellDate) {
+    public void sell(LocalDate sellDate) {
         this.status = BikeStatus.SELL;
         this.sellDate = sellDate;
         this.modifiedAt = LocalDateTime.now();
