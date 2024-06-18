@@ -37,10 +37,7 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public MyBikeGetResponseDto getMyBikeById(Long memberId, Long bikeId) {
-        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
-            bikeId, BikeStatus.DELETE).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_BIKE)
-        );
+        Bike getBike = findByMyBike(memberId, bikeId);
         return converterToDto(getBike);
     }
 
@@ -56,10 +53,7 @@ public class BikeService {
 
     @Transactional
     public void updateMyBikeMileage(Long memberId, Long bikeId, int mileage) {
-        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
-            bikeId, BikeStatus.DELETE).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_BIKE)
-        );
+        Bike getBike = findByMyBike(memberId, bikeId);
         if (getBike.getMileage() >= mileage) {
             throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
         }
@@ -69,10 +63,7 @@ public class BikeService {
 
     @Transactional
     public void sellMyBike(Long memberId, Long bikeId, LocalDate sellDate) {
-        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
-            bikeId, BikeStatus.DELETE).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_BIKE)
-        );
+        Bike getBike = findByMyBike(memberId, bikeId);
         if(sellDate.isBefore(getBike.getPurchaseDate())){
             throw new IllegalArgumentException("판매일이 구입일 이전 일 수 없습니다.");
         }
@@ -82,12 +73,15 @@ public class BikeService {
 
     @Transactional
     public void deleteMyBike(Long memberId, Long bikeId) {
-        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
-            bikeId, BikeStatus.DELETE).orElseThrow(() ->
-            new NotFoundException(NO_SUCH_BIKE)
-        );
+        Bike getBike = findByMyBike(memberId, bikeId);
         getBike.delete();
         bikeRepository.save(getBike);
+    }
+
+    private Bike findByMyBike(Long memberId, Long bikeId){
+        return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
+            bikeId, BikeStatus.DELETE).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_BIKE));
     }
 
     private MyBikeGetResponseDto converterToDto(Bike getBike) {
