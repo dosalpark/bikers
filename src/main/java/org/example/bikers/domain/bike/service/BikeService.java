@@ -60,7 +60,7 @@ public class BikeService {
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE)
         );
-        if(getBike.getMileage() >= mileage){
+        if (getBike.getMileage() >= mileage) {
             throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
         }
         getBike.updateMileage(mileage);
@@ -74,6 +74,16 @@ public class BikeService {
             new NotFoundException(NO_SUCH_BIKE)
         );
         getBike.sellBike(sellDate);
+        bikeRepository.save(getBike);
+    }
+
+    @Transactional
+    public void deleteMyBike(Long memberId, Long bikeId) {
+        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
+            bikeId, BikeStatus.DELETE).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_BIKE)
+        );
+        getBike.delete();
         bikeRepository.save(getBike);
     }
 

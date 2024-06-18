@@ -80,4 +80,9 @@ public class Bike {
         this.sellDate = sellDate;
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public void delete() {
+        this.status = BikeStatus.DELETE;
+        this.modifiedAt = LocalDateTime.now();
+    }
 }
