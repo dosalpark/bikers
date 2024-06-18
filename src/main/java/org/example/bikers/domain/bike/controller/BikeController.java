@@ -1,9 +1,11 @@
 package org.example.bikers.domain.bike.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
@@ -47,4 +49,12 @@ public class BikeController {
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDto));
     }
 
+    @GetMapping("/bikes")
+    public ResponseEntity<CommonResponseDto<List<MyBikesGetResponseDto>>> getMyBikes(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<MyBikesGetResponseDto> responseDtoList = bikeService.getMyBikes(
+            userDetails.getMember().getId());
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(CommonResponseDto.success(responseDtoList));
+    }
 }
