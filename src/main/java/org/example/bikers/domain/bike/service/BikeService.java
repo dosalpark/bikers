@@ -73,6 +73,9 @@ public class BikeService {
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE)
         );
+        if(sellDate.isBefore(getBike.getPurchaseDate())){
+            throw new IllegalArgumentException("판매일이 구입일 이전 일 수 없습니다.");
+        }
         getBike.sell(sellDate);
         bikeRepository.save(getBike);
     }
