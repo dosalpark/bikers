@@ -42,7 +42,7 @@ public class Bike {
     private LocalDate purchaseDate;
 
     @Column
-    private LocalDate saleDate;
+    private LocalDate sellDate;
 
     @Column
     private String image;
@@ -72,6 +72,12 @@ public class Bike {
 
     public void updateMileage(int mileage) {
         this.mileage = mileage;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void sellBike(LocalDate sellDate) {
+        this.status = BikeStatus.SELL;
+        this.sellDate = sellDate;
         this.modifiedAt = LocalDateTime.now();
     }
 }

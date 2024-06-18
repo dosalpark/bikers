@@ -14,7 +14,7 @@ public class MyBikeGetResponseDto {
     private String bikeSerialNumber;
     private int mileage;
     private LocalDate purchaseDate;
-    private LocalDate saleDate;
+    private LocalDate sellDate;
     private String bikeStatus;
 
 }

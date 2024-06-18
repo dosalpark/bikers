@@ -5,8 +5,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
-import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikeSellDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeUpdateMileageRequestDto;
+import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
@@ -69,6 +70,18 @@ public class BikeController {
             userDetails.getMember().getId(),
             bikeId,
             requestDto.getMileage());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/bikes/{bikeId}/sell")
+    public ResponseEntity<Void> sellMyBike(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @Valid @RequestBody MyBikeSellDateRequestDto requestDto) {
+        bikeService.sellMyBike(
+            userDetails.getMember().getId(),
+            bikeId,
+            requestDto.getSellDate());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

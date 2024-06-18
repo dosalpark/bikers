@@ -67,6 +67,16 @@ public class BikeService {
         bikeRepository.save(getBike);
     }
 
+    @Transactional
+    public void sellMyBike(Long memberId, Long bikeId, LocalDate sellDate) {
+        Bike getBike = bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
+            bikeId, BikeStatus.DELETE).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_BIKE)
+        );
+        getBike.sellBike(sellDate);
+        bikeRepository.save(getBike);
+    }
+
     private MyBikeGetResponseDto converterToDto(Bike getBike) {
         return MyBikeGetResponseDto.builder()
             .bikeId(getBike.getId())
@@ -75,7 +85,7 @@ public class BikeService {
             .bikeSerialNumber(getBike.getBikeSerialNumber())
             .mileage(getBike.getMileage())
             .purchaseDate(getBike.getPurchaseDate())
-            .saleDate(getBike.getSaleDate())
+            .sellDate(getBike.getSellDate())
             .bikeStatus(String.valueOf(getBike.getStatus())).build();
     }
 
