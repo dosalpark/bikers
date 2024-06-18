@@ -24,7 +24,7 @@ public class BikeService {
     private final BikeModelService bikeModelService;
     private final BikeRepository bikeRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
         String bikeSerialNumber, int mileage, LocalDate purchaseDate) {
 
