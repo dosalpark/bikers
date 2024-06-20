@@ -39,7 +39,8 @@ public class BikeController {
             requestDto.getNickName(),
             requestDto.getBikeSerialNumber().toUpperCase(),
             requestDto.getMileage(),
-            requestDto.getPurchaseDate());
+            requestDto.getPurchaseDate(),
+            requestDto.isPublic());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

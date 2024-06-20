@@ -26,12 +26,12 @@ public class BikeService {
 
     @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
-        String bikeSerialNumber, int mileage, LocalDate purchaseDate) {
+        String bikeSerialNumber, int mileage, LocalDate purchaseDate, boolean isPublic) {
 
         bikeModelService.validateByBikeModel(bikeModelId);
 
         Bike newBike = new Bike(memberId, bikeModelId, nickName, bikeSerialNumber, mileage,
-            purchaseDate);
+            purchaseDate, isPublic);
         bikeRepository.save(newBike);
     }
 
@@ -64,7 +64,7 @@ public class BikeService {
     @Transactional
     public void sellMyBike(Long memberId, Long bikeId, LocalDate sellDate) {
         Bike getBike = findByMyBike(memberId, bikeId);
-        if(sellDate.isBefore(getBike.getPurchaseDate())){
+        if (sellDate.isBefore(getBike.getPurchaseDate())) {
             throw new IllegalArgumentException("판매일이 구입일 이전 일 수 없습니다.");
         }
         getBike.sell(sellDate);
