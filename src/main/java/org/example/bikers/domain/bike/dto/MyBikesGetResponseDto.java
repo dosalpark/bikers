@@ -12,6 +12,6 @@ public class MyBikesGetResponseDto {
     private String nickName;
     private int mileage;
     private String bikeStatus;
-
+    private boolean visibility;
 
 }

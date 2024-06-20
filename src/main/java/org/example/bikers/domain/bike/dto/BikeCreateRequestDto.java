@@ -1,6 +1,7 @@
 package org.example.bikers.domain.bike.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -25,6 +26,10 @@ public class BikeCreateRequestDto {
     @PositiveOrZero(message = "현재 키로수를 입력해주세요")
     private int mileage;
 
+    @NotNull(message = "구매일을 입력해주세요")
     private LocalDate purchaseDate;
+
+    @NotNull(message = "공개여부를 설정해주세요")
+    private boolean visibility;
 
 }

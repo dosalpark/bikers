@@ -7,6 +7,7 @@ import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeSellDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeUpdateMileageRequestDto;
+import org.example.bikers.domain.bike.dto.MyBikeUpdateVisibilityRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeService;
 import org.example.bikers.global.dto.CommonResponseDto;
@@ -39,7 +40,8 @@ public class BikeController {
             requestDto.getNickName(),
             requestDto.getBikeSerialNumber().toUpperCase(),
             requestDto.getMileage(),
-            requestDto.getPurchaseDate());
+            requestDto.getPurchaseDate(),
+            requestDto.isVisibility());
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -73,6 +75,19 @@ public class BikeController {
             userDetails.getMember().getId(),
             bikeId,
             requestDto.getMileage());
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/bikes/{bikeId}/visibility")
+    public ResponseEntity<Void> updateVisibility(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @Valid @RequestBody MyBikeUpdateVisibilityRequestDto requestDto) {
+        bikeService.updateVisibility(
+            userDetails.getMember().getId(),
+            bikeId,
+            requestDto.isVisibility());
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

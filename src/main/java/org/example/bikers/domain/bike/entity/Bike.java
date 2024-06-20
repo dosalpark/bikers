@@ -52,6 +52,9 @@ public class Bike {
     private BikeStatus status;
 
     @Column(nullable = false)
+    private boolean visibility;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column
@@ -59,7 +62,7 @@ public class Bike {
 
 
     public Bike(Long memberId, Long bikeModelId, String nickName, String bikeSerialNumber,
-        int mileage, LocalDate purchaseDate) {
+        int mileage, LocalDate purchaseDate, boolean visibility) {
         this.memberId = memberId;
         this.bikeModelId = bikeModelId;
         this.nickName = nickName;
@@ -67,11 +70,17 @@ public class Bike {
         this.mileage = mileage;
         this.purchaseDate = purchaseDate;
         this.status = BikeStatus.HOLD;
+        this.visibility = visibility;
         this.createdAt = LocalDateTime.now();
     }
 
     public void updateMileage(int mileage) {
         this.mileage = mileage;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void updateVisibility(boolean visibility) {
+        this.visibility = visibility;
         this.modifiedAt = LocalDateTime.now();
     }
 
@@ -85,4 +94,5 @@ public class Bike {
         this.status = BikeStatus.DELETE;
         this.modifiedAt = LocalDateTime.now();
     }
+
 }
