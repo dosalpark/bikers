@@ -51,8 +51,8 @@ public class Bike {
     @Enumerated(EnumType.STRING)
     private BikeStatus status;
 
-    @Column
-    private boolean isPublic;
+    @Column(nullable = false)
+    private boolean visibility;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -62,7 +62,7 @@ public class Bike {
 
 
     public Bike(Long memberId, Long bikeModelId, String nickName, String bikeSerialNumber,
-        int mileage, LocalDate purchaseDate, boolean isPublic) {
+        int mileage, LocalDate purchaseDate, boolean visibility) {
         this.memberId = memberId;
         this.bikeModelId = bikeModelId;
         this.nickName = nickName;
@@ -70,7 +70,7 @@ public class Bike {
         this.mileage = mileage;
         this.purchaseDate = purchaseDate;
         this.status = BikeStatus.HOLD;
-        this.isPublic = isPublic;
+        this.visibility = visibility;
         this.createdAt = LocalDateTime.now();
     }
 

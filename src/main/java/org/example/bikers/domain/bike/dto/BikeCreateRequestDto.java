@@ -30,6 +30,6 @@ public class BikeCreateRequestDto {
     private LocalDate purchaseDate;
 
     @NotNull(message = "공개여부를 설정해주세요")
-    private boolean isPublic;
+    private boolean visibility;
 
 }

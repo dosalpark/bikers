@@ -78,7 +78,7 @@ public class BikeService {
         bikeRepository.save(getBike);
     }
 
-    private Bike findByMyBike(Long memberId, Long bikeId){
+    private Bike findByMyBike(Long memberId, Long bikeId) {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE));
@@ -93,7 +93,9 @@ public class BikeService {
             .mileage(getBike.getMileage())
             .purchaseDate(getBike.getPurchaseDate())
             .sellDate(getBike.getSellDate())
-            .bikeStatus(String.valueOf(getBike.getStatus())).build();
+            .bikeStatus(String.valueOf(getBike.getStatus()))
+            .visibility(getBike.isVisibility())
+            .build();
     }
 
     private List<MyBikesGetResponseDto> converterToDtoList(List<Bike> getBikes) {
@@ -105,6 +107,7 @@ public class BikeService {
                 .nickName(getBike.getNickName())
                 .mileage(getBike.getMileage())
                 .bikeStatus(String.valueOf(getBike.getStatus()))
+                .visibility(getBike.isVisibility())
                 .build();
             responseDtoList.add(responseDto);
         }
