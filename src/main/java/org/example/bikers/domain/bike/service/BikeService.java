@@ -62,6 +62,13 @@ public class BikeService {
     }
 
     @Transactional
+    public void updateVisibility(Long memberId, Long bikeId, boolean visibility) {
+        Bike getBike = findByMyBike(memberId, bikeId);
+        getBike.updateVisibility(visibility);
+        bikeRepository.save(getBike);
+    }
+
+    @Transactional
     public void sellMyBike(Long memberId, Long bikeId, LocalDate sellDate) {
         Bike getBike = findByMyBike(memberId, bikeId);
         if (sellDate.isBefore(getBike.getPurchaseDate())) {

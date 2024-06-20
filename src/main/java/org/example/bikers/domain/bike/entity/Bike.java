@@ -79,6 +79,11 @@ public class Bike {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    public void updateVisibility(boolean visibility) {
+        this.visibility = visibility;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
     public void sell(LocalDate sellDate) {
         this.status = BikeStatus.SELL;
         this.sellDate = sellDate;
@@ -89,4 +94,5 @@ public class Bike {
         this.status = BikeStatus.DELETE;
         this.modifiedAt = LocalDateTime.now();
     }
+
 }
