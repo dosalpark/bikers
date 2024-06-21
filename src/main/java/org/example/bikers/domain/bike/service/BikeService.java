@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.Bike;
@@ -14,6 +15,8 @@ import org.example.bikers.domain.bike.entity.BikeStatus;
 import org.example.bikers.domain.bike.repository.BikeRepository;
 import org.example.bikers.domain.bikeModel.service.BikeModelService;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +52,14 @@ public class BikeService {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
         return converterToDtoList(getBikes);
+    }
+
+    public Slice<BikesGetResponseDto> getBikes(Pageable pageable) {
+        Slice<Bike> getBikes = bikeRepository.findAllPagable(pageable);
+        if (getBikes.isEmpty()) {
+            throw new NotFoundException(BIKE_NOT_FOUND);
+        }
+        return conveterToDtoSlice(getBikes);
     }
 
     @Transactional
@@ -119,6 +130,17 @@ public class BikeService {
             responseDtoList.add(responseDto);
         }
         return responseDtoList;
+    }
+
+    private Slice<BikesGetResponseDto> conveterToDtoSlice(Slice<Bike> getBikes) {
+        return getBikes.map(getBike -> BikesGetResponseDto.builder()
+            .bikeId(getBike.getId())
+            .memberId(getBike.getMemberId())
+            .bikeModelId(getBike.getBikeModelId())
+            .nickName(getBike.getNickName())
+            .bikeStatus(String.valueOf(getBike.getStatus()))
+            .createdAt(getBike.getCreatedAt())
+            .build());
     }
 
 }
