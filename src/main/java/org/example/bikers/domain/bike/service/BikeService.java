@@ -12,9 +12,11 @@ import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.Bike;
 import org.example.bikers.domain.bike.entity.BikeStatus;
+import org.example.bikers.domain.bike.event.UpdateMileageEvent;
 import org.example.bikers.domain.bike.repository.BikeRepository;
 import org.example.bikers.domain.bikeModel.service.BikeModelService;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class BikeService {
 
     private final BikeModelService bikeModelService;
     private final BikeRepository bikeRepository;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
@@ -68,8 +71,12 @@ public class BikeService {
         if (getBike.getMileage() >= mileage) {
             throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
         }
+        int preMileage = getBike.getMileage();
         getBike.updateMileage(mileage);
         bikeRepository.save(getBike);
+
+        publisher.publishEvent(
+            new UpdateMileageEvent(bikeId, preMileage, mileage, "", ""));
     }
 
     @Transactional
