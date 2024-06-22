@@ -14,7 +14,8 @@ public enum ErrorCode {
     NO_SUCH_MEMBER("404", "MB000001", "해당하는 유저가 없습니다."),
     DELETED_MEMBER("404", "MB000002", "탈퇴한 회원 입니다."),
     NO_SUCH_BIKE("404", "BK000001", "해당하는 바이크가 없습니다."),
-    BIKE_NOT_FOUND("404", "BM000002", "조회 할 바이크가 없습니다.");
+    BIKE_NOT_FOUND("404", "BM000002", "조회 할 바이크가 없습니다."),
+    NO_SUCH_POST("404", "PS000001", "해당하는 게시물이 없습니다");
 
     private final String httpStatus;
     private final String code;
