@@ -55,4 +55,9 @@ public class Post {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    public void delete() {
+        this.status = PostStatus.DELETE;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }

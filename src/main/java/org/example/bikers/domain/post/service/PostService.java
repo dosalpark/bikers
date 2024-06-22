@@ -29,8 +29,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostGetResponseDto getPostById(Long postId) {
-        Post getPost = postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
-            .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
+        Post getPost = findByPost(postId);
         return converterDto(getPost);
     }
 
@@ -45,20 +44,32 @@ public class PostService {
 
     @Transactional
     public void updatePost(Long memberId, Long postId, String title, String content) {
-        Post getPost = postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
-            .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
+        Post getPost = findByPost(postId);
         validationPostOwner(memberId, getPost.getMemberId());
 
         getPost.update(title, content);
         postRepository.save(getPost);
     }
 
-    private void validationPostOwner(Long loginMemberId, Long postOwnerId) {
-        if (loginMemberId != postOwnerId) {
-            throw new IllegalArgumentException("작성자만 수정 할 수 있습니다.");
-        }
+    @Transactional
+    public void deletePost(Long memberId, Long postId) {
+        Post getPost = findByPost(postId);
+        validationPostOwner(memberId, getPost.getMemberId());
+
+        getPost.delete();
+        postRepository.save(getPost);
     }
 
+    private Post findByPost(Long postId) {
+        return postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
+            .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
+    }
+
+    private void validationPostOwner(Long loginMemberId, Long postOwnerId) {
+        if (loginMemberId != postOwnerId) {
+            throw new IllegalArgumentException("작성자만 수정 및 삭제 할 수 있습니다.");
+        }
+    }
 
     private PostGetResponseDto converterDto(Post getPost) {
         return PostGetResponseDto.builder()
