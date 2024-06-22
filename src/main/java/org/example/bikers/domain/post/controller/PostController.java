@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.post.dto.PostCreateRequestDto;
 import org.example.bikers.domain.post.dto.PostGetResponseDto;
+import org.example.bikers.domain.post.dto.PostUpdateRequestDto;
 import org.example.bikers.domain.post.dto.PostsGetResponseDto;
 import org.example.bikers.domain.post.service.PostService;
 import org.example.bikers.global.dto.CommonResponseDto;
@@ -18,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,6 +77,19 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<Void> updatePost(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long postId,
+        @Valid @RequestBody PostUpdateRequestDto requestDto) {
+        postService.updatePost(
+            userDetails.getMember().getId(),
+            postId,
+            requestDto.getTitle(),
+            requestDto.getContent());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     private boolean validationOrderBy(String orderBy) {
