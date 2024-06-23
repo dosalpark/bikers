@@ -12,6 +12,7 @@ import org.example.bikers.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +59,18 @@ public class CommentController {
             postId,
             commentId,
             requestDto.getContent());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long postId,
+        @PathVariable Long commentId) {
+        commentService.deleteComment(
+            userDetails.getMember().getId(),
+            postId,
+            commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

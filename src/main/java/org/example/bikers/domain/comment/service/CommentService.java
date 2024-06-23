@@ -39,12 +39,26 @@ public class CommentService {
     @Transactional
     public void updateComment(Long memberId, Long postId, Long commentId, String content) {
         postService.validateByPost(postId);
-        Comment getComment = commentRepository.findCommentByIdEqualsAndStatusNot(commentId,
-            CommentStatus.DELETE).orElseThrow(() -> new NotFoundException(NO_SUCH_COMMENT));
+        Comment getComment = findByComment(commentId);
         validationCommentOwner(memberId, getComment.getMemberId());
 
         getComment.update(content);
         commentRepository.save(getComment);
+    }
+
+    @Transactional
+    public void deleteComment(Long memberId, Long postId, Long commentId) {
+        postService.validateByPost(postId);
+        Comment getComment = findByComment(commentId);
+        validationCommentOwner(memberId, getComment.getMemberId());
+
+        getComment.delete();
+        commentRepository.save(getComment);
+    }
+
+    private Comment findByComment(Long commentId) {
+        return commentRepository.findCommentByIdEqualsAndStatusNot(commentId,
+            CommentStatus.DELETE).orElseThrow(() -> new NotFoundException(NO_SUCH_COMMENT));
     }
 
     private void validationCommentOwner(Long loginMemberId, Long commentOwnerId) {
