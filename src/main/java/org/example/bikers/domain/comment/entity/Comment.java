@@ -49,4 +49,9 @@ public class Comment {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void update(String content) {
+        this.content = content;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }
