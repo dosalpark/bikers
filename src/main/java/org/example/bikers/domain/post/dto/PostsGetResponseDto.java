@@ -8,6 +8,7 @@ import lombok.Getter;
 @Builder
 public class PostsGetResponseDto {
 
+    private Long postId;
     private String title;
     private Long memberId;
     private LocalDateTime createdAt;

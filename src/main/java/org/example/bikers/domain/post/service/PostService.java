@@ -89,6 +89,7 @@ public class PostService {
 
     private Slice<PostsGetResponseDto> converterDtoSlice(Slice<Post> getPosts) {
         return getPosts.map(getPost -> PostsGetResponseDto.builder()
+            .postId(getPost.getId())
             .title(getPost.getTitle())
             .memberId(getPost.getMemberId())
             .createdAt(getPost.getCreatedAt())
