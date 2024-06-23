@@ -60,6 +60,12 @@ public class PostService {
         postRepository.save(getPost);
     }
 
+    @Transactional(readOnly = true)
+    public void validateByPost(Long postId) {
+        postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
+            .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
+    }
+
     private Post findByPost(Long postId) {
         return postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
             .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
@@ -83,6 +89,7 @@ public class PostService {
 
     private Slice<PostsGetResponseDto> converterDtoSlice(Slice<Post> getPosts) {
         return getPosts.map(getPost -> PostsGetResponseDto.builder()
+            .postId(getPost.getId())
             .title(getPost.getTitle())
             .memberId(getPost.getMemberId())
             .createdAt(getPost.getCreatedAt())
