@@ -1,13 +1,17 @@
 package org.example.bikers.domain.comment.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.comment.dto.CommentCreateResponseDto;
+import org.example.bikers.domain.comment.dto.CommentsGetResponseDto;
 import org.example.bikers.domain.comment.service.CommentService;
+import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +35,14 @@ public class CommentController {
             postId,
             responseDto.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonResponseDto<List<CommentsGetResponseDto>>> getComments(
+        @PathVariable Long postId) {
+        List<CommentsGetResponseDto> responseDtoList = commentService.getComments(postId);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(CommonResponseDto.success(responseDtoList));
     }
 
 }
