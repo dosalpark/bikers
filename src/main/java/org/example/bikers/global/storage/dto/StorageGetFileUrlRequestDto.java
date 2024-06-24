@@ -1,4 +1,4 @@
-package org.example.bikers.domain.storage.dto;
+package org.example.bikers.global.storage.dto;
 
 import lombok.Getter;
 
