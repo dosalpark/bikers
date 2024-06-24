@@ -17,7 +17,8 @@ public enum ErrorCode {
     BIKE_NOT_FOUND("404", "BM000002", "조회 할 바이크가 없습니다."),
     NO_SUCH_POST("404", "PS000001", "해당하는 게시물이 없습니다"),
     POST_NOT_FOUND("404", "PS000002", "조회 할 게시물이 없습니다."),
-    NO_SUCH_COMMENT("404", "CM000001", "해당하는 댓글이 없습니다");
+    NO_SUCH_COMMENT("404", "CM000001", "해당하는 댓글이 없습니다"),
+    FILE_NOT_SELECTED("404", "FI000001", "선택된 파일이 없습니다.");
 
     private final String httpStatus;
     private final String code;
