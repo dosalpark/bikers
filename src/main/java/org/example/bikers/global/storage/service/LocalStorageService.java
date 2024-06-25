@@ -1,6 +1,7 @@
 package org.example.bikers.global.storage.service;
 
 import static org.example.bikers.global.exception.ErrorCode.FILE_NOT_SELECTED;
+import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_FILE;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.example.bikers.global.storage.dto.StorageDeleteFileUrlRequestDto;
 import org.example.bikers.global.storage.dto.StorageGetFileUrlRequestDto;
 import org.example.bikers.global.storage.dto.StorageGetFileUrlResponseDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,7 @@ public class LocalStorageService implements StorageService {
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/downloads/")
             .path(fileName)
+            .build(false)
             .toUriString();
         return StorageGetFileUrlResponseDto.builder().fileUrl(fileDownloadUri).build();
     }
@@ -48,6 +51,15 @@ public class LocalStorageService implements StorageService {
         byte[] file = Files.readAllBytes(path);
         ByteArrayResource resource = new ByteArrayResource(file);
         return resource;
+    }
+
+    @Override
+    public void deleteFile(StorageDeleteFileUrlRequestDto requestDto) throws IOException {
+        Path path = Paths.get(fileStorageLocation + requestDto.getFileUrl()).normalize();
+
+        if (!Files.deleteIfExists(path)) {
+            throw new NotFoundException(NO_SUCH_FILE);
+        }
     }
 
 }
