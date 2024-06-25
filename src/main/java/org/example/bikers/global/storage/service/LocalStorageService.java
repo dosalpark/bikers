@@ -39,6 +39,7 @@ public class LocalStorageService implements StorageService {
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/downloads/")
             .path(fileName)
+            .build(false)
             .toUriString();
         return StorageGetFileUrlResponseDto.builder().fileUrl(fileDownloadUri).build();
     }
