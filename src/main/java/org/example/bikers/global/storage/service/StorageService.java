@@ -1,6 +1,7 @@
 package org.example.bikers.global.storage.service;
 
 import java.io.IOException;
+import org.example.bikers.global.storage.dto.StorageDeleteFileUrlRequestDto;
 import org.example.bikers.global.storage.dto.StorageGetFileUrlRequestDto;
 import org.example.bikers.global.storage.dto.StorageGetFileUrlResponseDto;
 import org.springframework.core.io.ByteArrayResource;
@@ -11,5 +12,7 @@ public interface StorageService {
     StorageGetFileUrlResponseDto uploadFile(MultipartFile file) throws IOException;
 
     ByteArrayResource downloadFile(StorageGetFileUrlRequestDto requestDto) throws IOException;
+
+    void deleteFile(StorageDeleteFileUrlRequestDto requestDto) throws IOException;
 
 }
