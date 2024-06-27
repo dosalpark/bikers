@@ -37,6 +37,13 @@ public class Member {
     private MemberRole memberRole;
 
     @Column
+    private String oauthId;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SignUpSource signUpSource;
+
+    @Column
     private String image;
 
     @Column
@@ -50,6 +57,18 @@ public class Member {
         this.password = password;
         this.status = MemberStatus.NORMAL;
         this.memberRole = memberRole;
+        this.signUpSource = SignUpSource.LOCAL;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Member(String email, String password, MemberRole memberRole, String oauthId,
+        SignUpSource signUpSource) {
+        this.email = email;
+        this.password = password;
+        this.status = MemberStatus.NORMAL;
+        this.memberRole = memberRole;
+        this.oauthId = oauthId;
+        this.signUpSource = signUpSource;
         this.createdAt = LocalDateTime.now();
     }
 
