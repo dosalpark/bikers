@@ -22,9 +22,9 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${admin.secret.token}")
-    private String AdminSecretKey;
-    private final String deleteMessageCheck = "회원탈퇴";
+    @Value("${admin.secret.key}")
+    private String adminSecretKey;
+    private static final String deleteMessageCheck = "회원탈퇴";
 
     @Transactional
     public void singUp(String email, String password, String checkPassword) {
@@ -67,7 +67,7 @@ public class MemberService {
 
     @Transactional
     public void promoteToAdmin(Long memberId, String secretKey) {
-        if (!AdminSecretKey.equals(secretKey)) {
+        if (!adminSecretKey.equals(secretKey)) {
             throw new IllegalArgumentException("secretKey 불일치");
         }
         Member getMember = findByMember(memberId);

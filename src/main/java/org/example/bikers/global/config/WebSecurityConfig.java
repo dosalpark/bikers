@@ -74,10 +74,10 @@ public class WebSecurityConfig {
 
         httpSecurity.authorizeHttpRequests(
             (authorizeHttpRequests) -> authorizeHttpRequests
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-                .permitAll()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/v1").permitAll()
                 .requestMatchers("/v1/members/**").permitAll()
+                .requestMatchers("/oauth/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
                 .anyRequest().authenticated()

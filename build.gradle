@@ -46,6 +46,9 @@ dependencies {
 
     // security
     testImplementation 'org.springframework.security:spring-security-test'
+
+    //Gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
 }
 
 tasks.named('test') {
