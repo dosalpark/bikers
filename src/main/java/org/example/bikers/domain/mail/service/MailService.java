@@ -2,11 +2,13 @@ package org.example.bikers.domain.mail.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.mail.entity.Mail;
 import org.example.bikers.domain.mail.repository.MailRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -39,9 +41,22 @@ public class MailService {
         mailRepository.save(newMail);
     }
 
+    public void verify(String email, String code) {
+        Mail getMail = mailRepository.findMailByEmailEqualsAndAuthCodeEquals(email, code)
+            .orElse(null);
+        if (getMail == null) {
+            throw new DuplicateKeyException("인증번호가 일치하지 않습니다.");
+        }
+        if (LocalDateTime.now().isAfter(getMail.getExpireDate())) {
+            throw new IllegalArgumentException("인증시간이 만료되었습니다.");
+        }
+        mailRepository.delete(getMail);
+    }
+
     private String createCode() {
         Random random = new Random();
         int randomNumber = 100000 + random.nextInt(900000);
         return String.valueOf(randomNumber);
     }
+
 }

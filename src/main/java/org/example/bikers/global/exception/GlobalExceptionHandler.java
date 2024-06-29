@@ -1,10 +1,12 @@
 package org.example.bikers.global.exception;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +43,22 @@ public class GlobalExceptionHandler {
         log.error("url: {}, msg: {}, \n Stacktrace", request.getRequestURI(), ex.getMessage(),
             ex.fillInStackTrace());
         return ResponseEntity.badRequest().body(CommonResponseDto.fail("400", sb.toString()));
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity handleDuplicateKeyException(DuplicateKeyException ex,
+        HttpServletRequest request) {
+        log.error("url: {}, msg: {}, \n Stacktrace", request.getRequestURI(), ex.getMessage(),
+            ex.fillInStackTrace());
+        return ResponseEntity.badRequest().body(CommonResponseDto.fail("400", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity handleMessagingException(MessagingException ex,
+        HttpServletRequest request) {
+        log.error("url: {}, msg: {}, \n Stacktrace", request.getRequestURI(), ex.getMessage(),
+            ex.fillInStackTrace());
+        return ResponseEntity.badRequest().body(CommonResponseDto.fail("400", ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
