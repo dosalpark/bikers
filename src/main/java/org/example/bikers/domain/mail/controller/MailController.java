@@ -20,14 +20,15 @@ public class MailController {
 
     private final MailService mailService;
 
-    @PostMapping("/send")
-    public ResponseEntity<Void> send(@Valid @RequestBody MailGetEmailRequestDto requestDto)
+    @PostMapping("/signup/verification-code")
+    public ResponseEntity<Void> sendVerificationCodeForSignup(
+        @Valid @RequestBody MailGetEmailRequestDto requestDto)
         throws MessagingException {
-        mailService.send(requestDto.getEmail());
+        mailService.sendVerificationCodeForSignup(requestDto.getEmail());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/verification")
     public ResponseEntity<Void> verify(
         @Valid @RequestBody MailGetVerifyEmailRequestDto requestDto) {
         mailService.verify(

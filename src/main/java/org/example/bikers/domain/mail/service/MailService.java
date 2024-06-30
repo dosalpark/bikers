@@ -27,17 +27,17 @@ public class MailService {
     @Value("${mail.check-email.auth-code.expiration-second}")
     private long expireSeconds;
 
-    public void send(String email) throws MessagingException {
-        String code = createCode();
+    public void sendVerificationCodeForSignup(String email) throws MessagingException {
+        String verificationCode = createVerificationCode();
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
 
         messageHelper.setTo(email);
         messageHelper.setSubject(subject);
-        messageHelper.setText(content + code, true);
+        messageHelper.setText(content + verificationCode, true);
         mailSender.send(message);
 
-        Mail newMail = new Mail(email, code, expireSeconds);
+        Mail newMail = new Mail(email, verificationCode, expireSeconds);
         mailRepository.save(newMail);
     }
 
@@ -53,7 +53,7 @@ public class MailService {
         mailRepository.delete(getMail);
     }
 
-    private String createCode() {
+    private String createVerificationCode() {
         Random random = new Random();
         int randomNumber = 100000 + random.nextInt(900000);
         return String.valueOf(randomNumber);
