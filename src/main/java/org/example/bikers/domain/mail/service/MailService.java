@@ -7,6 +7,7 @@ import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.mail.entity.Mail;
 import org.example.bikers.domain.mail.repository.MailRepository;
+import org.example.bikers.domain.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,6 +20,7 @@ public class MailService {
 
     private final JavaMailSender mailSender;
     private final MailRepository mailRepository;
+    private final MemberService memberService;
 
     @Value("${mail.check-email.subject}")
     private String subject;
@@ -28,6 +30,22 @@ public class MailService {
     private long expireSeconds;
 
     public void sendVerificationCodeForSignup(String email) throws MessagingException {
+        String verificationCode = createVerificationCode();
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+
+        messageHelper.setTo(email);
+        messageHelper.setSubject(subject);
+        messageHelper.setText(content + verificationCode, true);
+        mailSender.send(message);
+
+        Mail newMail = new Mail(email, verificationCode, expireSeconds);
+        mailRepository.save(newMail);
+    }
+
+    public void sendVerificationCodeForPasswordForget(String email) throws MessagingException {
+        memberService.validateByLocalUser(email);
+
         String verificationCode = createVerificationCode();
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
