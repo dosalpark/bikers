@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
 import org.example.bikers.domain.member.entity.MemberStatus;
+import org.example.bikers.domain.member.entity.SignUpSource;
 import org.example.bikers.domain.member.repository.MemberRepository;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +76,18 @@ public class MemberService {
 
         getMember.promote();
         memberRepository.save(getMember);
+    }
+
+    @Transactional
+    public void validateByLocalUser(String email) {
+        Member getMember = memberRepository.findByEmail(email).orElseThrow(() ->
+            new NotFoundException(NO_SUCH_MEMBER));
+        if (getMember.getStatus().equals(MemberStatus.DELETE)) {
+            throw new NotFoundException(DELETED_MEMBER);
+        }
+        if (!getMember.getSignUpSource().equals(SignUpSource.LOCAL)) {
+            throw new DuplicateKeyException(getMember.getSignUpSource() + " 플랫폼으로 가입한 회원입니다.");
+        }
     }
 
     private Member findByMember(Long memberId) {

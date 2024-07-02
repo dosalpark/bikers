@@ -28,6 +28,14 @@ public class MailController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PostMapping("/forget-password/verification-code")
+    public ResponseEntity<Void> sendVerificationCodeForPasswordForget(
+        @Valid @RequestBody MailGetEmailRequestDto requestDto)
+        throws MessagingException {
+        mailService.sendVerificationCodeForPasswordForget(requestDto.getEmail());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @PostMapping("/verification")
     public ResponseEntity<Void> verify(
         @Valid @RequestBody MailGetVerifyEmailRequestDto requestDto) {
