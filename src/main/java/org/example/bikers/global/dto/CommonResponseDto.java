@@ -29,6 +29,10 @@ public class CommonResponseDto<T> {
         return new CommonResponseDto<>(status, msg, data);
     }
 
+    public static CommonResponseDto success(String status, String msg) {
+        return new CommonResponseDto(status, msg, null);
+    }
+
     public static CommonResponseDto fail(String status, String msg) {
         return new CommonResponseDto(status, msg, null);
     }

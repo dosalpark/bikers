@@ -1,13 +1,13 @@
 package org.example.bikers.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.example.bikers.domain.member.dto.MemberLoginRequestDto;
 import org.example.bikers.domain.member.entity.Member;
+import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-
 
     public AuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
@@ -48,18 +47,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response, FilterChain filterChain, Authentication authentication)
         throws IOException {
         Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
-        String token = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
-
-        ObjectNode statusMsg = new ObjectMapper().createObjectNode();
-        statusMsg.put("status", "200");
-        statusMsg.put("meg", "success");
-        String responseCode = new ObjectMapper().writeValueAsString(statusMsg);
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(),
+            member.getEmail());
 
         response.setStatus(200);
-        response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, token);
+        response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, accessToken);
+        response.addHeader(JwtTokenProvider.REFRESH_TOKEN_HEADER, refreshToken);
         response.setContentType("application/json");
-        response.setContentLength(responseCode.length());
-        response.getOutputStream().write(responseCode.getBytes());
+        response.getWriter().write(new ObjectMapper().writeValueAsString(
+            CommonResponseDto.success("200", "로그인 성공")));
     }
 
     @Override
@@ -67,14 +64,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response, AuthenticationException failed)
         throws IOException {
 
-        ObjectNode statusMsg = new ObjectMapper().createObjectNode();
-        statusMsg.put("status", "401");
-        statusMsg.put("meg", failed.getMessage());
-        String responseCode = new ObjectMapper().writeValueAsString(statusMsg);
-
         response.setStatus(401);
         response.setContentType("application/json");
-        response.setContentLength(responseCode.length());
-        response.getOutputStream().write(responseCode.getBytes());
+        response.getWriter().write(new ObjectMapper().writeValueAsString(
+            CommonResponseDto.fail("401", failed.getMessage())));
     }
+    
 }
