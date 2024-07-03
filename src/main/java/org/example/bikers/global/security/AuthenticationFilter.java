@@ -48,7 +48,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response, FilterChain filterChain, Authentication authentication)
         throws IOException {
         Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
-        String token = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(),
+            member.getEmail());
 
         ObjectNode statusMsg = new ObjectMapper().createObjectNode();
         statusMsg.put("status", "200");
@@ -56,7 +58,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String responseCode = new ObjectMapper().writeValueAsString(statusMsg);
 
         response.setStatus(200);
-        response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, token);
+        response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, accessToken);
+        response.addHeader(JwtTokenProvider.REFRESH_TOKEN_HEADER, refreshToken);
         response.setContentType("application/json");
         response.setContentLength(responseCode.length());
         response.getOutputStream().write(responseCode.getBytes());

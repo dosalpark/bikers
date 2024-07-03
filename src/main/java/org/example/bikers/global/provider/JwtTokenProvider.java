@@ -8,10 +8,12 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -20,8 +22,14 @@ import org.springframework.util.StringUtils;
 public class JwtTokenProvider {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
     public static final String BEARER_PREFIX = "Bearer ";
-    private final long TOKEN_TIME = 60 * 60 * 1000L;
+
+    @Value("${jwt.expire.access-token}")
+    private long accessTokenExpireMilliSecond;
+
+    @Value("${jwt.expire.refresh-token}")
+    private long refreshTokenExpireMilliSecond;
 
     @Value("${jwt.secret.token}")
     private String secretToken;
@@ -29,6 +37,7 @@ public class JwtTokenProvider {
     private Key key;
 
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @PostConstruct
     public void init() {
@@ -41,9 +50,26 @@ public class JwtTokenProvider {
         return BEARER_PREFIX + Jwts.builder()
             .claim("userId", userId)
             .claim("email", email)
-            .setExpiration(new Date(date.getTime() + TOKEN_TIME))
+            .setExpiration(new Date(date.getTime() + accessTokenExpireMilliSecond))
             .signWith(key, signatureAlgorithm)
             .compact();
+    }
+
+    public String createRefreshToken(Long userId, String email) {
+        Date date = new Date();
+        String createRefreshToken = BEARER_PREFIX + Jwts.builder()
+            .claim("userId", userId)
+            .claim("email", email)
+            .setExpiration(new Date(date.getTime() + refreshTokenExpireMilliSecond))
+            .signWith(key, signatureAlgorithm)
+            .compact();
+
+        redisTemplate.opsForValue().set(
+            userId + ":" + email,
+            createRefreshToken,
+            Duration.ofMillis(refreshTokenExpireMilliSecond));
+
+        return createRefreshToken;
     }
 
     public String getJwtFromHeader(HttpServletRequest request) {
