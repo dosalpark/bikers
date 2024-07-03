@@ -57,7 +57,7 @@ public class JwtTokenProvider {
 
     public String createRefreshToken(Long userId, String email) {
         Date date = new Date();
-        String createRefreshToken = BEARER_PREFIX + Jwts.builder()
+        String createRefreshToken = Jwts.builder()
             .claim("userId", userId)
             .claim("email", email)
             .setExpiration(new Date(date.getTime() + refreshTokenExpireMilliSecond))
@@ -65,14 +65,14 @@ public class JwtTokenProvider {
             .compact();
 
         redisTemplate.opsForValue().set(
-            userId + ":" + email,
             createRefreshToken,
+            userId + ":" + email,
             Duration.ofMillis(refreshTokenExpireMilliSecond));
 
-        return createRefreshToken;
+        return BEARER_PREFIX + createRefreshToken;
     }
 
-    public String getJwtFromHeader(HttpServletRequest request) {
+    public String getAccessTokenFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
@@ -80,12 +80,30 @@ public class JwtTokenProvider {
         return null;
     }
 
+    public String getRefreshTokenFromHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader(REFRESH_TOKEN_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+
     public boolean validateToken(String token) {
         Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         return true;
     }
 
-    public Claims getUserInfoFromToken(String token) {
+    public Claims getUserInfoFromAccessToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
+
+    public String getMemberInfoFromRefreshToken(String refreshToken) {
+        String memberInfo = redisTemplate.opsForValue().get(refreshToken);
+        if (StringUtils.hasText(memberInfo)) {
+            return memberInfo;
+        }
+        return null;
+    }
+
 }
