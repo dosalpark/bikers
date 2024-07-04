@@ -57,6 +57,44 @@ Bike manage application
 </details>
 
 <details>
+<summary>메일 인증 구현 <a href="https://pshistory.tistory.com/92" target="_blank">[블로그]</a></summary>
+<div markdown="1">
+  
+  ### 적용이유
+
+  아무렇게나 계정을 생성하는 것을 막기위해서 email 인증을 도입
+  도입함으로서 본인임을 인증하고 사용하기에 악성 댓글등이 감소하는 효과를 기대
+  
+  동작방식
+  1. email을 body에 담아 요청
+  2. 해당 email에 인증코드 발송
+  3. email과 인증코드를 같이 입력
+  * exception: 이메일 형식이 맞지 않을 때, 인증코드가 맞지않을 때, 인증코드 유효시간이 지났을 때
+
+  ![인증메일 발송](https://github.com/dosalpark/bikers/assets/154612223/ca92bfda-1a03-46f4-83ad-a54fdd827060)
+
+  email을 기재하고 요청을 보냄
+
+  ![인증번호 확인](https://github.com/dosalpark/bikers/assets/154612223/6f70d024-ba61-4a4a-a645-2f836171c206)
+
+  email에 도착한 메일에 인증번호 확인
+
+  ![인증번호 입력](https://github.com/dosalpark/bikers/assets/154612223/34382a00-0d87-4cde-b311-52ee7832b537)
+
+  email과 인증번호를 같이 입력하면 Http Status 204로 성공, DB에서 해당 내용 삭제
+
+  ![잘못된 인증번호 입력](https://github.com/dosalpark/bikers/assets/154612223/1d09f49d-3643-48c4-a9c1-3b4e0cf6a37a)
+
+  잘못된 인증번호 입력하면 exception 발생
+
+  ![인증시간 만료](https://github.com/dosalpark/bikers/assets/154612223/85ddc73c-28dc-4315-8ed3-fe28a924b7c2)
+
+  설정한 인증시간이 지나게되면 exception 발생
+
+</div>
+</details>
+
+<details>
 <summary>Jwt RefreshToken 적용 <a href="https://pshistory.tistory.com/93" target="_blank">[블로그]</a></summary>
 <div markdown="1">  
   
