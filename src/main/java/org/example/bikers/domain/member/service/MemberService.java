@@ -90,6 +90,13 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void validateByDuplicateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new DuplicateKeyException("이미 존재하는 이메일 입니다.");
+        }
+    }
+
     private Member findByMember(Long memberId) {
         Member getMember = memberRepository.findById(memberId).orElseThrow(() ->
             new NotFoundException(NO_SUCH_MEMBER));
