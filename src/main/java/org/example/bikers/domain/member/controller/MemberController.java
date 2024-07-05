@@ -2,7 +2,6 @@ package org.example.bikers.domain.member.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.member.dto.MemberDeleteRequestDto;
 import org.example.bikers.domain.member.dto.MemberPromoteRequestDto;
 import org.example.bikers.domain.member.dto.MemberSignupRequestDto;
 import org.example.bikers.domain.member.dto.MemberUpdatePasswordRequestDto;
@@ -35,10 +34,10 @@ public class MemberController {
     }
 
     @PatchMapping("/password")
-    public ResponseEntity<Void> updateMemberByPassword(
+    public ResponseEntity<Void> updatePassword(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @Valid @RequestBody MemberUpdatePasswordRequestDto requestDto) {
-        memberService.updateMemberByPassword(
+        memberService.updatePassword(
             userDetails.getMember().getId(),
             requestDto.getNewPassword(),
             requestDto.getChkNewPassword());
@@ -46,10 +45,8 @@ public class MemberController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteMember(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @Valid @RequestBody MemberDeleteRequestDto requestDto) {
-        memberService.deleteMember(userDetails.getMember().getId(), requestDto.getDeleteMessage());
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        memberService.delete(userDetails.getMember().getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -60,4 +57,5 @@ public class MemberController {
         memberService.promoteToAdmin(userDetails.getMember().getId(), requestDto.getSecretKey());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
 }

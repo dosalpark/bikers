@@ -26,7 +26,6 @@ public class MemberService {
 
     @Value("${admin.secret.key}")
     private String adminSecretKey;
-    private static final String deleteMessageCheck = "회원탈퇴";
 
     @Transactional
     public void singUp(String email, String password, String checkPassword) {
@@ -42,7 +41,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateMemberByPassword(Long memberId, String newPassword,
+    public void updatePassword(Long memberId, String newPassword,
         String chkNewPassword) {
         if (!newPassword.equals(chkNewPassword)) {
             throw new IllegalArgumentException("패스워드 불일치");
@@ -54,10 +53,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteMember(Long memberId, String deleteMessage) {
-        if (!deleteMessageCheck.equals(deleteMessage)) {
-            throw new IllegalArgumentException("탈퇴하시려면 '회원탈퇴'를 정확히 입력해주세요");
-        }
+    public void delete(Long memberId) {
         Member getMember = findByMember(memberId);
 
         getMember.delete();
