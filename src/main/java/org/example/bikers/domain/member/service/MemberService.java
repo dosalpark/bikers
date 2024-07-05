@@ -42,15 +42,12 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateMemberByPassword(Long memberId, String oldPassword, String newPassword,
+    public void updateMemberByPassword(Long memberId, String newPassword,
         String chkNewPassword) {
         if (!newPassword.equals(chkNewPassword)) {
             throw new IllegalArgumentException("패스워드 불일치");
         }
         Member getMember = findByMember(memberId);
-        if (!passwordEncoder.matches(oldPassword, getMember.getPassword())) {
-            throw new IllegalArgumentException("패스워드 불일치");
-        }
 
         getMember.updatePassword(passwordEncoder.encode(newPassword));
         memberRepository.save(getMember);
@@ -98,4 +95,5 @@ public class MemberService {
         }
         return getMember;
     }
+
 }

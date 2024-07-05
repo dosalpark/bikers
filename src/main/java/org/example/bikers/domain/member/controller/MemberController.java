@@ -40,7 +40,6 @@ public class MemberController {
         @Valid @RequestBody MemberUpdatePasswordRequestDto requestDto) {
         memberService.updateMemberByPassword(
             userDetails.getMember().getId(),
-            requestDto.getOldPassword(),
             requestDto.getNewPassword(),
             requestDto.getChkNewPassword());
         return ResponseEntity.status((HttpStatus.OK)).build();
