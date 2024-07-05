@@ -28,6 +28,15 @@ public class MailController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PostMapping("/signup/verification")
+    public ResponseEntity<Void> verifyVerificationCodeForSignup(
+        @Valid @RequestBody MailGetVerifyEmailRequestDto requestDto) {
+        mailService.verifyVerificationCodeForSignup(
+            requestDto.getEmail(),
+            requestDto.getCode());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @PostMapping("/forget-password/verification-code")
     public ResponseEntity<Void> sendVerificationCodeForPasswordForget(
         @Valid @RequestBody MailGetEmailRequestDto requestDto)
@@ -36,10 +45,10 @@ public class MailController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PostMapping("/verification")
-    public ResponseEntity<Void> verify(
+    @PostMapping("/forget-password/verification")
+    public ResponseEntity<Void> verifyVerificationCodeForPasswordForget(
         @Valid @RequestBody MailGetVerifyEmailRequestDto requestDto) {
-        mailService.verify(
+        mailService.verifyVerificationCodeForPasswordForget(
             requestDto.getEmail(),
             requestDto.getCode());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

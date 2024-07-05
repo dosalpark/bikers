@@ -1,7 +1,18 @@
 # Bikers
 
+Bike manage application
+
+## 목표 (지속적으로 추가)
+* Jwt AccessToken, RefreshToken 적용 (완료)
+* post, comment, BikeModel, Bike CRUD (완료)
+* 바이크 관리(주행거리 등록, 환경검사 등)
+* 채팅기능 구현
+* 투어 등록시 로그인시 등록 위치 기반으로 투어에 대한 알림메세지 전송
+
+## 적용
+
 <details>
-<summary>Spring Event를 사용한 도메인 간 의존성 완화</summary>
+<summary>Spring Event를 사용한 도메인 간 의존성 완화 <a href="https://pshistory.tistory.com/90" target="_blank">[블로그]</a></summary>
 <div markdown="1">       
   
   ### 도입이유
@@ -42,5 +53,81 @@
   3. BikeMileageService.addMileageHistory  -> bikeMileage 객체 생성
   4. BikeMileageService.addMileageHistory  -> bikeMileage 객체 저장
   
+</div>
+</details>
+
+<details>
+<summary>메일 인증 구현 <a href="https://pshistory.tistory.com/92" target="_blank">[블로그]</a></summary>
+<div markdown="1">
+  
+  ### 적용이유
+
+  아무렇게나 계정을 생성하는 것을 막기위해서 email 인증을 도입
+  도입함으로서 본인임을 인증하고 사용하기에 악성 댓글등이 감소하는 효과를 기대
+  
+  동작방식
+  1. email을 body에 담아 요청
+  2. 해당 email에 인증코드 발송
+  3. email과 인증코드를 같이 입력
+  * exception: 이메일 형식이 맞지 않을 때, 인증코드가 맞지않을 때, 인증코드 유효시간이 지났을 때
+
+  ![인증메일 발송](https://github.com/dosalpark/bikers/assets/154612223/ca92bfda-1a03-46f4-83ad-a54fdd827060)
+
+  email을 기재하고 요청을 보냄
+
+  ![인증번호 확인](https://github.com/dosalpark/bikers/assets/154612223/6f70d024-ba61-4a4a-a645-2f836171c206)
+
+  email에 도착한 메일에 인증번호 확인
+
+  ![인증번호 입력](https://github.com/dosalpark/bikers/assets/154612223/34382a00-0d87-4cde-b311-52ee7832b537)
+
+  email과 인증번호를 같이 입력하면 Http Status 204로 성공, DB에서 해당 내용 삭제
+
+  ![잘못된 인증번호 입력](https://github.com/dosalpark/bikers/assets/154612223/1d09f49d-3643-48c4-a9c1-3b4e0cf6a37a)
+
+  잘못된 인증번호 입력하면 exception 발생
+
+  ![인증시간 만료](https://github.com/dosalpark/bikers/assets/154612223/85ddc73c-28dc-4315-8ed3-fe28a924b7c2)
+
+  설정한 인증시간이 지나게되면 exception 발생
+
+</div>
+</details>
+
+<details>
+<summary>Jwt RefreshToken 적용 <a href="https://pshistory.tistory.com/93" target="_blank">[블로그]</a></summary>
+<div markdown="1">  
+  
+  ### 적용이유
+  
+  AccessToken의 만료시간을 길게 줄 경우 탈취되었을때 보안상의 위험에 대비해서 RefreshToken 적용
+
+  ![로그인](https://github.com/dosalpark/bikers/assets/154612223/8a3be9c9-a03f-468c-b8d5-58b9e288cc67)
+
+  로그인을 하게 되면 Response Header에 AccessToken과 RefreshToken 전달
+
+  ![AccessToken 만료, RefreshToken 전달안함](https://github.com/dosalpark/bikers/assets/154612223/dd560fad-cd4c-458b-8f3c-61d06435666e)
+
+  AccessToken이 만료되고 RefreshToken을 전달하지 않으면 HttpStatus 400과 오류메세지 전달
+
+  ![AccessToken 만료, RefreshToken 전달](https://github.com/dosalpark/bikers/assets/154612223/881cc1d3-3761-42ab-8bc8-dcba534230f4)
+
+  AccessToken이 만료되었을때 RefreshToken을 같이 전달하면 새로운 AccessToken이 전달됨
+
+  ![RefreshToken 만료](https://github.com/dosalpark/bikers/assets/154612223/7c94aca5-c381-413f-865c-f4637ab7886d)
+  ![AccessToken 만료, RefreshToken 만료](https://github.com/dosalpark/bikers/assets/154612223/6024b340-9216-4bb5-ae27-e8075834588d)
+
+  등록한 RefreshToken이 TTL이 지나서 만료되었을때 RefreshToken을 전달하더라도 HttpStatus 400과 오류메세지를 전달
+
+
+  ### 정리
+  
+  1. 인가 필요한 요청시 Access Token/Refresh Token 만료 -> 토큰만료, 리프레시토큰 없습니다(실패)
+  2. 인가 필요한 요청시 Access Token만료/Refresh Token 없음 -> 토큰만료, 리프레시토큰 없습니다(실패)
+  3. 인가 필요한 요청시 Access Token만료/Refresh Token 만료되지 않음 -> Access Token 발급
+
+  RefreshToken을 사용함으로서 AccessToken의 수명을 짧게 가져갈 수 있어서 보안성을 높힐 수 있었고, 사용자가 자주 로그인하지 않아도 되면서 사용자 경험이 크게 개선되었다고 생각
+
+
 </div>
 </details>
