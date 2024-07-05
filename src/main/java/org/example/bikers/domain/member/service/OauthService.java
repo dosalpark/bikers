@@ -1,12 +1,12 @@
 package org.example.bikers.domain.member.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import java.net.URI;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.member.dto.KakaoAccountResponseDto;
+import org.example.bikers.domain.member.dto.KakaoMemberInfoResponseDto;
+import org.example.bikers.domain.member.dto.KakaoTokenResponseDto;
 import org.example.bikers.domain.member.dto.OauthMemberResponseDto;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
@@ -34,6 +34,7 @@ public class OauthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RestTemplate restTemplate;
+    private final Gson gson;
 
     @Value("${oauth.kakao.key}")
     private String kakaoKey;
@@ -79,9 +80,11 @@ public class OauthService {
             .is5xxServerError()) {
             throw new IllegalArgumentException("오류가 발생했습니다.");
         }
-        JsonElement result = new JsonParser().parse(Objects.requireNonNull(response.getBody()));
 
-        return result.getAsJsonObject().get("access_token").getAsString();
+        KakaoTokenResponseDto responseDto = gson.fromJson(response.getBody(),
+            KakaoTokenResponseDto.class);
+
+        return responseDto.getAccessToken();
     }
 
     private OauthMemberResponseDto getMemberInfoByKakao(String token) {
@@ -95,15 +98,15 @@ public class OauthService {
         header.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
         header.add("Authorization", "Bearer " + token);
 
-
         RequestEntity<String> request = new RequestEntity<>(header, HttpMethod.GET, uri);
-
         ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-        JsonElement result = new JsonParser().parse(Objects.requireNonNull(response.getBody()));
 
-        long oauthId = result.getAsJsonObject().get("id").getAsLong();
-        JsonObject kakaoAccount = result.getAsJsonObject().get("kakao_account").getAsJsonObject();
-        String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+        KakaoMemberInfoResponseDto memberInfoResponseDto = gson.fromJson(response.getBody(),
+            KakaoMemberInfoResponseDto.class);
+        KakaoAccountResponseDto accountResponseDto = memberInfoResponseDto.getKakaoAccount();
+
+        long oauthId = memberInfoResponseDto.getId();
+        String email = accountResponseDto.getEmail();
 
         return OauthMemberResponseDto.builder()
             .oauthId(String.valueOf(oauthId))
