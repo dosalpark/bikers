@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.member.dto.KakaoAccountResponseDto;
-import org.example.bikers.domain.member.dto.KakaoMemberInfoResponseDto;
 import org.example.bikers.domain.member.dto.KakaoTokenResponseDto;
+import org.example.bikers.domain.member.dto.NaverMemberInfoResponseDto;
+import org.example.bikers.domain.member.dto.NaverResponseDto;
 import org.example.bikers.domain.member.dto.OauthMemberResponseDto;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
@@ -28,7 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class OauthService {
+public class NaverService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,26 +36,29 @@ public class OauthService {
     private final RestTemplate restTemplate;
     private final Gson gson;
 
-    @Value("${oauth.kakao.key}")
-    private String kakaoKey;
-    @Value("${oauth.kakao.secret-key}")
-    private String kakaoSecretKey;
-    @Value("${oauth.kakao.redirect-uri}")
-    private String kakaoRedirectUri;
+    @Value("${oauth.naver.key}")
+    private String naverKey;
+    @Value("${oauth.naver.secret-key}")
+    private String naverSecretKey;
+    @Value("${oauth.naver.redirect-uri}")
+    private String naverRedirectUri;
 
-    public String kakaoLogin(String code) {
-        String kakaoToken = getTokenByKakao(code);
-        OauthMemberResponseDto responseDto = getMemberInfoByKakao(kakaoToken);
-        Member getMember = registerKakaoUserIfNeeded(responseDto.getOauthId(),
+
+    public String login(String code, String state) {
+        String naverToken = getToken(code, state);
+        OauthMemberResponseDto responseDto = getMemberInfo(naverToken);
+        Member getMember = registerOAuthUserIfNeeded(responseDto.getOauthId(),
             responseDto.getEmail());
 
         return jwtTokenProvider.createAccessToken(getMember.getId(), getMember.getEmail());
     }
 
-    private String getTokenByKakao(String code) {
+
+    private String getToken(String code, String state) {
+
         URI uri = UriComponentsBuilder
-            .fromUriString("https://kauth.kakao.com")
-            .path("/oauth/token")
+            .fromUriString("https://nid.naver.com")
+            .path("/oauth2.0/token")
             .build()
             .toUri();
 
@@ -64,10 +67,10 @@ public class OauthService {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("client_id", kakaoKey);
-        body.add("client_secret", kakaoSecretKey);
-        body.add("redirect_uri", kakaoRedirectUri);
+        body.add("client_id", naverKey);
+        body.add("client_secret", naverSecretKey);
         body.add("code", code);
+        body.add("state", state);
 
         RequestEntity<MultiValueMap<String, String>> request = RequestEntity
             .post(uri)
@@ -87,10 +90,10 @@ public class OauthService {
         return responseDto.getAccessToken();
     }
 
-    private OauthMemberResponseDto getMemberInfoByKakao(String token) {
+    private OauthMemberResponseDto getMemberInfo(String token) {
         URI uri = UriComponentsBuilder
-            .fromUriString("https://kapi.kakao.com")
-            .path("/v2/user/me")
+            .fromUriString("https://openapi.naver.com")
+            .path("/v1/nid/me")
             .build()
             .toUri();
 
@@ -101,20 +104,28 @@ public class OauthService {
         RequestEntity<String> request = new RequestEntity<>(header, HttpMethod.GET, uri);
         ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
-        KakaoMemberInfoResponseDto memberInfoResponseDto = gson.fromJson(response.getBody(),
-            KakaoMemberInfoResponseDto.class);
-        KakaoAccountResponseDto accountResponseDto = memberInfoResponseDto.getKakaoAccount();
 
-        long oauthId = memberInfoResponseDto.getId();
-        String email = accountResponseDto.getEmail();
+
+        NaverMemberInfoResponseDto memberInfoResponseDto = gson.fromJson(response.getBody(),
+            NaverMemberInfoResponseDto.class);
+
+        if (!memberInfoResponseDto.getMessage().equals("success")) {
+            throw new IllegalArgumentException("에러");
+        }
+
+        NaverResponseDto responseDto = memberInfoResponseDto.getResponse();
+
+        String oauthId = responseDto.getId();
+        String email = responseDto.getEmail();
 
         return OauthMemberResponseDto.builder()
             .oauthId(String.valueOf(oauthId))
             .email(email)
             .build();
+
     }
 
-    private Member registerKakaoUserIfNeeded(String oauthId, String email) {
+    private Member registerOAuthUserIfNeeded(String oauthId, String email) {
         Member getMemberByOauthId = memberRepository.findByOauthId(oauthId).orElse(null);
         if (getMemberByOauthId == null) {
             Member getMemberByEmail = memberRepository.findByEmail(email).orElse(null);
@@ -124,7 +135,7 @@ public class OauthService {
                     passwordEncoder.encode(UUID.randomUUID().toString()),
                     MemberRole.USER,
                     oauthId,
-                    SignUpSource.KAKAO);
+                    SignUpSource.NAVER);
                 memberRepository.save(newMember);
                 return newMember;
             } else {
