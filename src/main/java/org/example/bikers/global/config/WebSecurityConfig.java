@@ -2,7 +2,6 @@ package org.example.bikers.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.repository.MemberRepository;
-import org.example.bikers.domain.member.service.CustomOauth2UserService;
 import org.example.bikers.global.exception.CustomAccessDeniedHandler;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.example.bikers.global.security.AuthenticationFilter;
@@ -33,7 +32,6 @@ public class WebSecurityConfig {
     public final MemberRepository memberRepository;
     public final CustomUserDetailsService userDetailsService;
     public final AuthenticationConfiguration authenticationConfiguration;
-    public final CustomOauth2UserService customOauth2UserService;
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -86,9 +84,6 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
                 .anyRequest().authenticated()
         );
-
-        httpSecurity.oauth2Login(oauth2Login -> oauth2Login.userInfoEndpoint(
-            userinfoEndpoint -> userinfoEndpoint.userService(customOauth2UserService)));
 
         httpSecurity.exceptionHandling(
             exceptionHandling -> exceptionHandling.accessDeniedHandler(accessDeniedHandler()));
