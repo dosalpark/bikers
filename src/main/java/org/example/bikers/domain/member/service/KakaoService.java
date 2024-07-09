@@ -6,8 +6,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.dto.KakaoAccountResponseDto;
 import org.example.bikers.domain.member.dto.KakaoMemberInfoResponseDto;
-import org.example.bikers.domain.member.dto.KakaoTokenResponseDto;
 import org.example.bikers.domain.member.dto.OauthMemberResponseDto;
+import org.example.bikers.domain.member.dto.OauthTokenResponseDto;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
 import org.example.bikers.domain.member.entity.SignUpSource;
@@ -28,7 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
-public class OauthService {
+public class KakaoService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -43,16 +43,16 @@ public class OauthService {
     @Value("${oauth.kakao.redirect-uri}")
     private String kakaoRedirectUri;
 
-    public String kakaoLogin(String code) {
-        String kakaoToken = getTokenByKakao(code);
-        OauthMemberResponseDto responseDto = getMemberInfoByKakao(kakaoToken);
-        Member getMember = registerKakaoUserIfNeeded(responseDto.getOauthId(),
+    public String login(String code) {
+        String kakaoToken = getToken(code);
+        OauthMemberResponseDto responseDto = getMemberInfo(kakaoToken);
+        Member getMember = registerOAuthUserIfNeeded(responseDto.getOauthId(),
             responseDto.getEmail());
 
         return jwtTokenProvider.createAccessToken(getMember.getId(), getMember.getEmail());
     }
 
-    private String getTokenByKakao(String code) {
+    private String getToken(String code) {
         URI uri = UriComponentsBuilder
             .fromUriString("https://kauth.kakao.com")
             .path("/oauth/token")
@@ -81,13 +81,13 @@ public class OauthService {
             throw new IllegalArgumentException("오류가 발생했습니다.");
         }
 
-        KakaoTokenResponseDto responseDto = gson.fromJson(response.getBody(),
-            KakaoTokenResponseDto.class);
+        OauthTokenResponseDto responseDto = gson.fromJson(response.getBody(),
+            OauthTokenResponseDto.class);
 
         return responseDto.getAccessToken();
     }
 
-    private OauthMemberResponseDto getMemberInfoByKakao(String token) {
+    private OauthMemberResponseDto getMemberInfo(String token) {
         URI uri = UriComponentsBuilder
             .fromUriString("https://kapi.kakao.com")
             .path("/v2/user/me")
@@ -114,7 +114,7 @@ public class OauthService {
             .build();
     }
 
-    private Member registerKakaoUserIfNeeded(String oauthId, String email) {
+    private Member registerOAuthUserIfNeeded(String oauthId, String email) {
         Member getMemberByOauthId = memberRepository.findByOauthId(oauthId).orElse(null);
         if (getMemberByOauthId == null) {
             Member getMemberByEmail = memberRepository.findByEmail(email).orElse(null);
