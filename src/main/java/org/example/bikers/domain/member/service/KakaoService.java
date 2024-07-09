@@ -6,8 +6,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.dto.KakaoAccountResponseDto;
 import org.example.bikers.domain.member.dto.KakaoMemberInfoResponseDto;
-import org.example.bikers.domain.member.dto.KakaoTokenResponseDto;
 import org.example.bikers.domain.member.dto.OauthMemberResponseDto;
+import org.example.bikers.domain.member.dto.OauthTokenResponseDto;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
 import org.example.bikers.domain.member.entity.SignUpSource;
@@ -81,8 +81,8 @@ public class KakaoService {
             throw new IllegalArgumentException("오류가 발생했습니다.");
         }
 
-        KakaoTokenResponseDto responseDto = gson.fromJson(response.getBody(),
-            KakaoTokenResponseDto.class);
+        OauthTokenResponseDto responseDto = gson.fromJson(response.getBody(),
+            OauthTokenResponseDto.class);
 
         return responseDto.getAccessToken();
     }

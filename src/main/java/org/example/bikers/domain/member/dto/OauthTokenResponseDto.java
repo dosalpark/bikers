@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
 @Getter
-public class KakaoTokenResponseDto {
+public class OauthTokenResponseDto {
 
     @SerializedName("access_token")
     private String accessToken;

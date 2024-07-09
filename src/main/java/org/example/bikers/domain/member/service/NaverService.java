@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.member.dto.KakaoTokenResponseDto;
 import org.example.bikers.domain.member.dto.NaverMemberInfoResponseDto;
 import org.example.bikers.domain.member.dto.NaverResponseDto;
 import org.example.bikers.domain.member.dto.OauthMemberResponseDto;
+import org.example.bikers.domain.member.dto.OauthTokenResponseDto;
 import org.example.bikers.domain.member.entity.Member;
 import org.example.bikers.domain.member.entity.MemberRole;
 import org.example.bikers.domain.member.entity.SignUpSource;
@@ -84,8 +84,8 @@ public class NaverService {
             throw new IllegalArgumentException("오류가 발생했습니다.");
         }
 
-        KakaoTokenResponseDto responseDto = gson.fromJson(response.getBody(),
-            KakaoTokenResponseDto.class);
+        OauthTokenResponseDto responseDto = gson.fromJson(response.getBody(),
+            OauthTokenResponseDto.class);
 
         return responseDto.getAccessToken();
     }
