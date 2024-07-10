@@ -64,7 +64,6 @@ public class BikeModelService {
                 manufacturer = null;
             }
         }
-
         Slice<BikeModelGetResponseDto> getModels = bikeModelRepository.getBikeModels(pageable,
             BikeModelStatus.NORMAL, name, manufacturer, year);
         if (getModels.isEmpty()) {
@@ -117,23 +116,12 @@ public class BikeModelService {
     private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
         return BikeModelGetResponseDto.builder()
             .bikeModelId(getModel.getId())
-            .manufacturer(String.valueOf(getModel.getManufacturer()))
+            .manufacturer(getModel.getManufacturer())
             .name(getModel.getName())
             .year(getModel.getYear())
-            .bikeCategory(String.valueOf(getModel.getBikeCategory()))
+            .bikeCategory(getModel.getBikeCategory())
             .displacement(getModel.getDisplacement())
             .build();
-    }
-
-    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels) {
-        return getModels.map(getModel -> BikeModelGetResponseDto.builder()
-            .bikeModelId(getModel.getId())
-            .manufacturer(String.valueOf(getModel.getManufacturer()))
-            .name(getModel.getName())
-            .year(getModel.getYear())
-            .bikeCategory(String.valueOf(getModel.getBikeCategory()))
-            .displacement(getModel.getDisplacement())
-            .build());
     }
 
     private boolean isValidBikeCategory(String bikeCategory) {
@@ -153,4 +141,5 @@ public class BikeModelService {
         }
         return false;
     }
+
 }

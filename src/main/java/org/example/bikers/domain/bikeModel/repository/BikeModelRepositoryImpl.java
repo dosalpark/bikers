@@ -3,6 +3,7 @@ package org.example.bikers.domain.bikeModel.repository;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -12,6 +13,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
@@ -29,9 +31,17 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
     private final QBikeModel bikeModel = QBikeModel.bikeModel;
 
     @Override
-    public Slice<BikeModel> getBikeModels(Pageable pageable, BikeModelStatus status,
+    public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, BikeModelStatus status,
         String name, String manufacturer, Integer year) {
-        List<BikeModel> getBikeModels = queryFactory.select(bikeModel).from(bikeModel)
+        List<BikeModelGetResponseDto> getBikeModels = queryFactory.select(
+                Projections.constructor(BikeModelGetResponseDto.class,
+                    bikeModel.id,
+                    bikeModel.manufacturer,
+                    bikeModel.name,
+                    bikeModel.year,
+                    bikeModel.bikeCategory,
+                    bikeModel.displacement)
+            ).from(bikeModel)
             .where(
                 bikeModel.bikeModelStatus.eq(status),
                 nameEq(name),
@@ -42,6 +52,7 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
             .limit(pageable.getPageSize() + 1)
             .orderBy(getOrder(pageable))
             .fetch();
+
         boolean hasNext = getBikeModels.size() == pageable.getPageSize() + 1;
 
         if (hasNext) {
