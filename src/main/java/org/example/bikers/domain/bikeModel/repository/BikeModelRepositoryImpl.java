@@ -3,7 +3,7 @@ package org.example.bikers.domain.bikeModel.repository;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,11 +11,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
+import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
 import org.example.bikers.domain.bikeModel.entity.QBikeModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
@@ -23,9 +25,15 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QBikeModel bikeModel = QBikeModel.bikeModel;
 
-    public Slice<BikeModel> getBikeModels(Pageable pageable, Predicate predicate) {
+    @Override
+    public Slice<BikeModel> getBikeModels(Pageable pageable, BikeModelStatus status,
+        String modelName, Integer year) {
         List<BikeModel> getBikeModels = queryFactory.select(bikeModel).from(bikeModel)
-            .where(predicate)
+            .where(
+                bikeModel.bikeModelStatus.eq(status),
+                modelNameEq(modelName),
+                yearEq(year)
+            )
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1)
             .orderBy(getOrder(pageable))
@@ -36,6 +44,14 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
             getBikeModels.remove(pageable.getPageSize());
         }
         return new SliceImpl<>(getBikeModels, pageable, hasNext);
+    }
+
+    private BooleanExpression modelNameEq(String modelName) {
+        return StringUtils.hasText(modelName) ? bikeModel.name.eq(modelName.toUpperCase()) : null;
+    }
+
+    private BooleanExpression yearEq(Integer year) {
+        return year != null ? bikeModel.year.eq(year) : null;
     }
 
     private OrderSpecifier<?> getOrder(Pageable pageable) {
