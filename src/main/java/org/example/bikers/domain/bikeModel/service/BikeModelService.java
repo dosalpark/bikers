@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -57,18 +58,19 @@ public class BikeModelService {
     @Transactional(readOnly = true)
     public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, String name,
         String manufacturer, Integer year) {
-        if (!manufacturer.isEmpty()) {
+        if (StringUtils.hasText(manufacturer)) {
             manufacturer = manufacturer.toUpperCase();
+            if (!isValidManufacturer(manufacturer)) {
+                manufacturer = null;
+            }
         }
-        if (!isValidManufacturer(manufacturer)) {
-            manufacturer = null;
-        }
-        Slice<BikeModel> getModels = bikeModelRepository.getBikeModels(pageable,
+
+        Slice<BikeModelGetResponseDto> getModels = bikeModelRepository.getBikeModels(pageable,
             BikeModelStatus.NORMAL, name, manufacturer, year);
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
-        return converterToDtoSlice(getModels);
+        return getModels;
     }
 
     @Transactional
