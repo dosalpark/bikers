@@ -5,12 +5,14 @@ import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_CATEGORY
 import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_MANUFACTURER;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE_MODEL;
 
+import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
+import org.example.bikers.domain.bikeModel.entity.QBikeModel;
 import org.example.bikers.domain.bikeModel.repository.BikeModelRepository;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.data.domain.Pageable;
@@ -56,7 +58,9 @@ public class BikeModelService {
 
     @Transactional(readOnly = true)
     public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable) {
-        Slice<BikeModel> getModels = bikeModelRepository.getBikeModels(pageable);
+        Predicate predicate = QBikeModel.bikeModel.bikeModelStatus.eq(BikeModelStatus.NORMAL);
+
+        Slice<BikeModel> getModels = bikeModelRepository.getBikeModels(pageable, predicate);
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }

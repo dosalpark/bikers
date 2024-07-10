@@ -3,6 +3,7 @@ package org.example.bikers.domain.bikeModel.repository;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,8 +23,9 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QBikeModel bikeModel = QBikeModel.bikeModel;
 
-    public Slice<BikeModel> getBikeModels(Pageable pageable) {
+    public Slice<BikeModel> getBikeModels(Pageable pageable, Predicate predicate) {
         List<BikeModel> getBikeModels = queryFactory.select(bikeModel).from(bikeModel)
+            .where(predicate)
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1)
             .orderBy(getOrder(pageable))
