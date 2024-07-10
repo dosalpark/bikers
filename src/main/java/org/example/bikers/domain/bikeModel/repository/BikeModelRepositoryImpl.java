@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.BikeModelStatus;
+import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 import org.example.bikers.domain.bikeModel.entity.QBikeModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,11 +30,12 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
 
     @Override
     public Slice<BikeModel> getBikeModels(Pageable pageable, BikeModelStatus status,
-        String name, Integer year) {
+        String name, String manufacturer, Integer year) {
         List<BikeModel> getBikeModels = queryFactory.select(bikeModel).from(bikeModel)
             .where(
                 bikeModel.bikeModelStatus.eq(status),
                 nameEq(name),
+                manufacturerEq(manufacturer),
                 yearEq(year)
             )
             .offset(pageable.getOffset())
@@ -54,6 +56,11 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
 
     private BooleanExpression yearEq(Integer year) {
         return year != null ? bikeModel.year.eq(year) : null;
+    }
+
+    private BooleanExpression manufacturerEq(String manufacturer) {
+        return StringUtils.hasText(manufacturer) ?
+            bikeModel.manufacturer.eq(Manufacturer.valueOf(manufacturer)) : null;
     }
 
     private OrderSpecifier<?> getOrder(Pageable pageable) {

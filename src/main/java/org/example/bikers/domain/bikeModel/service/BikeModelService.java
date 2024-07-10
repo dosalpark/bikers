@@ -56,10 +56,15 @@ public class BikeModelService {
 
     @Transactional(readOnly = true)
     public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, String name,
-        Integer year) {
-
+        String manufacturer, Integer year) {
+        if (!manufacturer.isEmpty()) {
+            manufacturer = manufacturer.toUpperCase();
+        }
+        if (!isValidManufacturer(manufacturer)) {
+            manufacturer = null;
+        }
         Slice<BikeModel> getModels = bikeModelRepository.getBikeModels(pageable,
-            BikeModelStatus.NORMAL, name, year);
+            BikeModelStatus.NORMAL, name, manufacturer, year);
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }

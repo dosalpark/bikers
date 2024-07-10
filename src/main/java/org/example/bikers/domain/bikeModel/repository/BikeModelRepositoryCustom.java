@@ -8,6 +8,6 @@ import org.springframework.data.domain.Slice;
 public interface BikeModelRepositoryCustom {
 
     Slice<BikeModel> getBikeModels(Pageable pageable, BikeModelStatus status,
-        String modelName, Integer year);
+        String modelName, String manufacturer, Integer year);
 
 }

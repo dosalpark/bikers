@@ -58,11 +58,13 @@ public class BikeModelController {
     public ResponseEntity<CommonResponseDto<Slice<BikeModelGetResponseDto>>> getBikeModels(
         @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
         @RequestParam(required = false) String name,
+        @RequestParam(required = false) String manufacturer,
         @RequestParam(required = false) Integer year
     ) {
         Slice<BikeModelGetResponseDto> responseDtoList = bikeModelService.getBikeModels(
             pageable,
             name,
+            manufacturer,
             year);
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
