@@ -56,7 +56,7 @@ public class BikeModelService {
 
     @Transactional(readOnly = true)
     public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable) {
-        Slice<BikeModel> getModels = bikeModelRepository.findAllPagable(pageable);
+        Slice<BikeModel> getModels = bikeModelRepository.getBikeModels(pageable);
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }

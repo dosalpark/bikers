@@ -6,6 +6,6 @@ import org.springframework.data.domain.Slice;
 
 public interface BikeModelRepositoryCustom {
 
-    Slice<BikeModel> findAll(Pageable pageable);
+    Slice<BikeModel> getBikeModels(Pageable pageable);
 
 }
