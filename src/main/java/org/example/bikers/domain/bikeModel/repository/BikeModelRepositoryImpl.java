@@ -5,7 +5,9 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,12 +63,23 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
 
         PathBuilder<BikeModel> path = new PathBuilder<>(BikeModel.class, "bikeModel");
         DateTimePath<LocalDateTime> dateTimePath;
+        StringPath stringPath;
+        NumberPath<Integer> numberPath;
 
-        if (order.getProperty().equals("createdAt")) {
-            dateTimePath = path.getDateTime("createdAt", LocalDateTime.class);
-            return new OrderSpecifier<>(direction, dateTimePath);
+
+        switch (order.getProperty()) {
+            case "createdAt":
+                dateTimePath = path.getDateTime("createdAt", LocalDateTime.class);
+                return new OrderSpecifier<>(direction, dateTimePath);
+            case "name":
+                stringPath = path.getString("name");
+                return new OrderSpecifier<>(direction, stringPath);
+            case "year":
+                numberPath = path.getNumber("year", int.class);
+                return new OrderSpecifier<>(direction, numberPath);
+            default:
+                throw new IllegalArgumentException("정렬기준이 정확하지 않습니다");
         }
-        throw new IllegalArgumentException("정렬기준이 정확하지 않습니다");
     }
 
 }
