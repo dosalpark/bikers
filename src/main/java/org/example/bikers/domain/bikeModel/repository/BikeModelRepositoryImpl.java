@@ -29,11 +29,11 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
 
     @Override
     public Slice<BikeModel> getBikeModels(Pageable pageable, BikeModelStatus status,
-        String modelName, Integer year) {
+        String name, Integer year) {
         List<BikeModel> getBikeModels = queryFactory.select(bikeModel).from(bikeModel)
             .where(
                 bikeModel.bikeModelStatus.eq(status),
-                modelNameEq(modelName),
+                nameEq(name),
                 yearEq(year)
             )
             .offset(pageable.getOffset())
@@ -48,8 +48,8 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
         return new SliceImpl<>(getBikeModels, pageable, hasNext);
     }
 
-    private BooleanExpression modelNameEq(String modelName) {
-        return StringUtils.hasText(modelName) ? bikeModel.name.eq(modelName.toUpperCase()) : null;
+    private BooleanExpression nameEq(String name) {
+        return StringUtils.hasText(name) ? bikeModel.name.eq(name.toUpperCase()) : null;
     }
 
     private BooleanExpression yearEq(Integer year) {
