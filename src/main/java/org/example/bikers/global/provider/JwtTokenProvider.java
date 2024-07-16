@@ -65,8 +65,8 @@ public class JwtTokenProvider {
             .compact();
 
         redisTemplate.opsForValue().set(
-            createRefreshToken,
             userId + ":" + email,
+            createRefreshToken,
             Duration.ofMillis(refreshTokenExpireMilliSecond));
 
         return BEARER_PREFIX + createRefreshToken;
@@ -88,7 +88,6 @@ public class JwtTokenProvider {
         return null;
     }
 
-
     public boolean validateToken(String token) {
         Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         return true;
@@ -98,12 +97,9 @@ public class JwtTokenProvider {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
-    public String getMemberInfoFromRefreshToken(String refreshToken) {
-        String memberInfo = redisTemplate.opsForValue().get(refreshToken);
-        if (StringUtils.hasText(memberInfo)) {
-            return memberInfo;
-        }
-        return null;
+    public boolean validateRefreshToken(String memberInfo) {
+        String refreshToken = redisTemplate.opsForValue().get(memberInfo);
+        return StringUtils.hasText(refreshToken);
     }
 
 }

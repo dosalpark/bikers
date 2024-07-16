@@ -63,11 +63,11 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             String refreshToken = jwtTokenProvider.getRefreshTokenFromHeader(request);
             if (StringUtils.hasText(refreshToken)) {
-                String memberInfo = jwtTokenProvider.getMemberInfoFromRefreshToken(refreshToken);
-                if (StringUtils.hasText(memberInfo)) {
-                    Long memberId = Long.valueOf(memberInfo.split(":")[0]);
-                    String email = memberInfo.split(":")[1];
-
+                Claims info = e.getClaims();
+                Long memberId = info.get("userId", Long.class);
+                String email = info.get("email", String.class);
+                String memberInfo = memberId + ":" + email;
+                if (jwtTokenProvider.validateRefreshToken(memberInfo)) {
                     String newAccessToken = jwtTokenProvider.createAccessToken(memberId, email);
                     response.setStatus(HttpServletResponse.SC_CREATED);
                     response.setContentType("application/json; charset=UTF-8");
@@ -85,4 +85,5 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
 }
