@@ -71,7 +71,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     response.setContentType("application/json; charset=UTF-8");
                     response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, newAccessToken);
                     response.getWriter().write(new ObjectMapper().writeValueAsString(
-                        CommonResponseDto.success("200", "새로운 토큰이 발급되었습니다.")));
+                        CommonResponseDto.success("201", "새로운 토큰이 발급되었습니다.")));
                     return;
                 }
             }
