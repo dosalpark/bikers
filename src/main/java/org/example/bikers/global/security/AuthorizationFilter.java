@@ -55,11 +55,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (SecurityException | MalformedJwtException | SignatureException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json; charset=UTF-8");
-            response.getWriter().write(new ObjectMapper().writeValueAsString(
-                CommonResponseDto.fail("400", "토큰이 유효하지 않습니다.")));
+            sendErrorResponse(response, 401, "토큰이 유효하지 않습니다.");
             return;
+
         } catch (ExpiredJwtException e) {
             String refreshToken = jwtTokenProvider.getRefreshTokenFromHeader(request);
             if (StringUtils.hasText(refreshToken)) {
@@ -77,13 +75,18 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     return;
                 }
             }
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.setContentType("application/json; charset=UTF-8");
-            response.getWriter().write(new ObjectMapper().writeValueAsString(
-                CommonResponseDto.fail("400", "토큰 만료 및 리프레시 토큰이 없습니다. 다시 로그인 해주세요.")));
+            sendErrorResponse(response, 401, "토큰 만료 및 리프레시 토큰이 없습니다. 다시 로그인 해주세요.");
             return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode,
+        String errorMessage) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType("application/json; charset=UTF-8");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(
+            CommonResponseDto.fail(String.valueOf(statusCode), errorMessage)));
     }
 
 }
