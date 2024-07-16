@@ -7,6 +7,8 @@ import org.springframework.data.domain.Slice;
 
 public interface BikeModelRepositoryCustom {
 
+    BikeModelGetResponseDto getBikeModel(Long bikeModelId, BikeModelStatus status);
+
     Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, BikeModelStatus status,
         String modelName, String manufacturer, Integer year);
 

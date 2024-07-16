@@ -31,6 +31,23 @@ public class BikeModelRepositoryImpl implements BikeModelRepositoryCustom {
     private final QBikeModel bikeModel = QBikeModel.bikeModel;
 
     @Override
+    public BikeModelGetResponseDto getBikeModel(Long bikeModelId, BikeModelStatus status) {
+        return queryFactory.select(
+                Projections.constructor(BikeModelGetResponseDto.class,
+                    bikeModel.id,
+                    bikeModel.manufacturer,
+                    bikeModel.name,
+                    bikeModel.year,
+                    bikeModel.bikeCategory,
+                    bikeModel.displacement)
+            ).from(bikeModel)
+            .where(
+                bikeModel.bikeModelStatus.eq(status),
+                bikeModel.id.eq(bikeModelId))
+            .fetchOne();
+    }
+
+    @Override
     public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, BikeModelStatus status,
         String name, String manufacturer, Integer year) {
         List<BikeModelGetResponseDto> getBikeModels = queryFactory.select(

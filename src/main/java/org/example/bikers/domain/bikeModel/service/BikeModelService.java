@@ -5,6 +5,7 @@ import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_CATEGORY
 import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_MANUFACTURER;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE_MODEL;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
@@ -46,13 +47,12 @@ public class BikeModelService {
 
     @Transactional(readOnly = true)
     public BikeModelGetResponseDto getBikeModelById(Long bikeModelId) {
-        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
-            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
-        );
-        if (getModel.getBikeModelStatus() == BikeModelStatus.DELETE) {
+        BikeModelGetResponseDto responseDto = bikeModelRepository.getBikeModel(bikeModelId,
+            BikeModelStatus.NORMAL);
+        if (Objects.isNull(responseDto)) {
             throw new NotFoundException(NO_SUCH_BIKE_MODEL);
         }
-        return converterToDto(getModel);
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -111,17 +111,6 @@ public class BikeModelService {
         if (getModel.getBikeModelStatus().equals(BikeModelStatus.DELETE)) {
             throw new NotFoundException(NO_SUCH_BIKE_MODEL);
         }
-    }
-
-    private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
-        return BikeModelGetResponseDto.builder()
-            .bikeModelId(getModel.getId())
-            .manufacturer(getModel.getManufacturer())
-            .name(getModel.getName())
-            .year(getModel.getYear())
-            .bikeCategory(getModel.getBikeCategory())
-            .displacement(getModel.getDisplacement())
-            .build();
     }
 
     private boolean isValidBikeCategory(String bikeCategory) {
