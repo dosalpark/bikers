@@ -131,3 +131,105 @@ Bike manage application
 
 </div>
 </details>
+
+<details>
+<summary>Jwt RefreshToken 수정 <a href="https://pshistory.tistory.com/94" target="_blank">[블로그]</a></summary>
+<div markdown="1">  
+  
+  ### 수정이유
+  Redis에 RefreshToken을 저장할 때 변동성이 있는 RefreshToken을 key값으로 사용하여 사용자가 같은 ID로 계속 로그인 한다면 기존 RefreshToken이 갱신되는게 아니라 Redis에 새로운 RefreshToken이 저장됨
+
+  기존 value인 변경되지 않는 member의 PK, email을 조합해서 memberInfo를 생성해서 key로 사용하고 RefreshToken을 value로 저장
+  ```
+  //JwtTokenProvider.java
+//기존
+ public String createRefreshToken(Long userId, String email) {
+        ...
+        redisTemplate.opsForValue().set(
+            createRefreshToken,
+            userId + ":" + email,
+            Duration.ofMillis(refreshTokenExpireMilliSecond));
+
+        return BEARER_PREFIX + createRefreshToken;
+    }
+        
+//변경
+public String createRefreshToken(Long userId, String email) {
+        ...
+        redisTemplate.opsForValue().set(
+            userId + ":" + email,
+            createRefreshToken,
+            Duration.ofMillis(refreshTokenExpireMilliSecond));
+
+        return BEARER_PREFIX + createRefreshToken;
+    }
+  ```
+
+  AuthrizationFilter에서는 ExpiredJwtException에서 getClaims()를 통해서 만료된 AccessToken의 Claims를 받아오고 Claims에 있는 memberInfo를 통해서 RefreshToken을 검증하고 새로운 AccessToken을 만들어서 Response Header에 전달하도록 수정
+  ```
+//AuthorizationFilter.java
+//기존
+	@Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+    	FilterChain filterChain) throws ServletException, IOException {
+        ...
+        } catch (ExpiredJwtException e) {
+            String refreshToken = jwtTokenProvider.getRefreshTokenFromHeader(request);
+            if (StringUtils.hasText(refreshToken)) {
+                String memberInfo = jwtTokenProvider.getMemberInfoFromRefreshToken(refreshToken);
+                if (StringUtils.hasText(memberInfo)) {
+                    Long memberId = Long.valueOf(memberInfo.split(":")[0]);
+                    String email = memberInfo.split(":")[1];
+
+                    String newAccessToken = jwtTokenProvider.createAccessToken(memberId, email);
+                    response.setStatus(HttpServletResponse.SC_CREATED);
+                    response.setContentType("application/json; charset=UTF-8");
+                    response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, newAccessToken);
+                    response.getWriter().write(new ObjectMapper().writeValueAsString(
+                        CommonResponseDto.success("200", "새로운 토큰이 발급되었습니다.")));
+                    return;
+                }
+            }
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                CommonResponseDto.fail("400", "토큰 만료 및 리프레시 토큰이 없습니다. 다시 로그인 해주세요.")));
+            return;
+        }
+		...
+    }
+
+//변경
+	@Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+        FilterChain filterChain) throws ServletException, IOException {
+        ...
+        } catch (ExpiredJwtException e) {
+            String refreshToken = jwtTokenProvider.getRefreshTokenFromHeader(request);
+            if (StringUtils.hasText(refreshToken)) {
+                Claims info = e.getClaims();
+                Long memberId = info.get("userId", Long.class);
+                String email = info.get("email", String.class);
+                String memberInfo = memberId + ":" + email;
+                if (jwtTokenProvider.validateRefreshToken(memberInfo)) {
+                    String newAccessToken = jwtTokenProvider.createAccessToken(memberId, email);
+                    response.setStatus(HttpServletResponse.SC_CREATED);
+                    response.setContentType("application/json; charset=UTF-8");
+                    response.addHeader(JwtTokenProvider.AUTHORIZATION_HEADER, newAccessToken);
+                    response.getWriter().write(new ObjectMapper().writeValueAsString(
+                        CommonResponseDto.success("200", "새로운 토큰이 발급되었습니다.")));
+                    return;
+                }
+            }
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                CommonResponseDto.fail("400", "토큰 만료 및 리프레시 토큰이 없습니다. 다시 로그인 해주세요.")));
+            return;
+        }
+        ...
+    }
+  ```
+
+</div>
+</details>
