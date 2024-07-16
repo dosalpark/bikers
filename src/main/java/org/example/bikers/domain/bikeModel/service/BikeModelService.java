@@ -5,6 +5,7 @@ import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_CATEGORY
 import static org.example.bikers.global.exception.ErrorCode.NO_MATCHING_MANUFACTURER;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE_MODEL;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bikeModel.dto.BikeModelGetResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -45,22 +47,29 @@ public class BikeModelService {
 
     @Transactional(readOnly = true)
     public BikeModelGetResponseDto getBikeModelById(Long bikeModelId) {
-        BikeModel getModel = bikeModelRepository.findById(bikeModelId).orElseThrow(
-            () -> new NotFoundException(NO_SUCH_BIKE_MODEL)
-        );
-        if (getModel.getBikeModelStatus() == BikeModelStatus.DELETE) {
+        BikeModelGetResponseDto responseDto = bikeModelRepository.getBikeModel(bikeModelId,
+            BikeModelStatus.NORMAL);
+        if (Objects.isNull(responseDto)) {
             throw new NotFoundException(NO_SUCH_BIKE_MODEL);
         }
-        return converterToDto(getModel);
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
-    public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable) {
-        Slice<BikeModel> getModels = bikeModelRepository.findAllPagable(pageable);
+    public Slice<BikeModelGetResponseDto> getBikeModels(Pageable pageable, String name,
+        String manufacturer, Integer year) {
+        if (StringUtils.hasText(manufacturer)) {
+            manufacturer = manufacturer.toUpperCase();
+            if (!isValidManufacturer(manufacturer)) {
+                manufacturer = null;
+            }
+        }
+        Slice<BikeModelGetResponseDto> getModels = bikeModelRepository.getBikeModels(pageable,
+            BikeModelStatus.NORMAL, name, manufacturer, year);
         if (getModels.isEmpty()) {
             throw new NotFoundException(NO_BIKE_MODEL_FOUND);
         }
-        return converterToDtoSlice(getModels);
+        return getModels;
     }
 
     @Transactional
@@ -104,28 +113,6 @@ public class BikeModelService {
         }
     }
 
-    private BikeModelGetResponseDto converterToDto(BikeModel getModel) {
-        return BikeModelGetResponseDto.builder()
-            .bikeModelId(getModel.getId())
-            .manufacturer(String.valueOf(getModel.getManufacturer()))
-            .name(getModel.getName())
-            .year(getModel.getYear())
-            .bikeCategory(String.valueOf(getModel.getBikeCategory()))
-            .displacement(getModel.getDisplacement())
-            .build();
-    }
-
-    private Slice<BikeModelGetResponseDto> converterToDtoSlice(Slice<BikeModel> getModels) {
-        return getModels.map(getModel -> BikeModelGetResponseDto.builder()
-            .bikeModelId(getModel.getId())
-            .manufacturer(String.valueOf(getModel.getManufacturer()))
-            .name(getModel.getName())
-            .year(getModel.getYear())
-            .bikeCategory(String.valueOf(getModel.getBikeCategory()))
-            .displacement(getModel.getDisplacement())
-            .build());
-    }
-
     private boolean isValidBikeCategory(String bikeCategory) {
         for (BikeCategory one : BikeCategory.values()) {
             if (bikeCategory.equals(String.valueOf(one))) {
@@ -143,4 +130,5 @@ public class BikeModelService {
         }
         return false;
     }
+
 }
