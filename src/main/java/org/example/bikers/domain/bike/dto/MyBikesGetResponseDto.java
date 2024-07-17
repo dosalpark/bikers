@@ -1,12 +1,17 @@
 package org.example.bikers.domain.bike.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.example.bikers.domain.bike.entity.BikeStatus;
 import org.example.bikers.domain.bikeModel.entity.BikeCategory;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MyBikesGetResponseDto {
 
     private Long bikeId;
@@ -17,7 +22,7 @@ public class MyBikesGetResponseDto {
     private int displacement;
     private String nickName;
     private int mileage;
-    private String bikeStatus;
+    private BikeStatus bikeStatus;
     private boolean visibility;
 
 }

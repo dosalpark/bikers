@@ -4,7 +4,6 @@ import static org.example.bikers.global.exception.ErrorCode.BIKE_NOT_FOUND;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
@@ -49,12 +48,11 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public List<MyBikesGetResponseDto> getMyBikes(Long memberId) {
-        List<Bike> getBikes = bikeRepository.findAllByMemberIdEqualsAndStatusNot(memberId,
-            BikeStatus.DELETE);
-        if (getBikes.isEmpty()) {
+        List<MyBikesGetResponseDto> getMyBikes = bikeRepository.getMyBikes(memberId);
+        if (getMyBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
-        return converterToDtoList(getBikes);
+        return getMyBikes;
     }
 
     public Slice<BikesGetResponseDto> getBikes(Pageable pageable) {
@@ -121,22 +119,6 @@ public class BikeService {
             .bikeStatus(String.valueOf(getBike.getStatus()))
             .visibility(getBike.isVisibility())
             .build();
-    }
-
-    private List<MyBikesGetResponseDto> converterToDtoList(List<Bike> getBikes) {
-        List<MyBikesGetResponseDto> responseDtoList = new ArrayList<>();
-        for (Bike getBike : getBikes) {
-            MyBikesGetResponseDto responseDto = MyBikesGetResponseDto.builder()
-                .bikeId(getBike.getId())
-                .bikeModelId(getBike.getBikeModelId())
-                .nickName(getBike.getNickName())
-                .mileage(getBike.getMileage())
-                .bikeStatus(String.valueOf(getBike.getStatus()))
-                .visibility(getBike.isVisibility())
-                .build();
-            responseDtoList.add(responseDto);
-        }
-        return responseDtoList;
     }
 
     private Slice<BikesGetResponseDto> conveterToDtoSlice(Slice<Bike> getBikes) {

@@ -1,12 +1,18 @@
 package org.example.bikers.domain.bike.repository;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.Bike;
+import org.example.bikers.domain.bike.entity.BikeStatus;
+import org.example.bikers.domain.bike.entity.QBike;
+import org.example.bikers.domain.bikeModel.entity.QBikeModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -16,6 +22,34 @@ import org.springframework.data.domain.Sort.Order;
 public class BikeRepositoryImpl implements BikeRepositoryCustom {
 
     private final EntityManager entityManager;
+    private final JPAQueryFactory queryFactory;
+    private final QBike bike = QBike.bike;
+    private final QBikeModel bikeModel = QBikeModel.bikeModel;
+
+
+    @Override
+    public List<MyBikesGetResponseDto> getMyBikes(Long memberId) {
+        return queryFactory.select(
+                Projections.constructor(MyBikesGetResponseDto.class,
+                    bike.id,
+                    bikeModel.manufacturer,
+                    bikeModel.name,
+                    bikeModel.year,
+                    bikeModel.bikeCategory,
+                    bikeModel.displacement,
+                    bike.nickName,
+                    bike.mileage,
+                    bike.status,
+                    bike.visibility)
+            ).from(bike)
+            .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
+            .where(
+                bike.memberId.eq(memberId),
+                bike.status.ne(BikeStatus.DELETE)
+            )
+            .fetch();
+    }
+
 
     @Override
     public Slice<Bike> findAllPagable(Pageable pageable) {
