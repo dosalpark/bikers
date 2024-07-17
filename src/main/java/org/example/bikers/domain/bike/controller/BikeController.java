@@ -72,7 +72,7 @@ public class BikeController {
             .body(CommonResponseDto.success(responseDtoList));
     }
 
-    @GetMapping("/bikes/other")
+    @GetMapping("/bikes/visible")
     public ResponseEntity<CommonResponseDto<Slice<BikesGetResponseDto>>> getBikes(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
