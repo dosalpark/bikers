@@ -60,11 +60,11 @@ public class BikeService {
     }
 
     public Slice<BikesGetResponseDto> getBikes(Pageable pageable) {
-        Slice<Bike> getBikes = bikeRepository.findAllPagable(pageable);
+        Slice<BikesGetResponseDto> getBikes = bikeRepository.getBikes(pageable);
         if (getBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
-        return conveterToDtoSlice(getBikes);
+        return getBikes;
     }
 
     @Transactional
@@ -109,17 +109,6 @@ public class BikeService {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE));
-    }
-
-    private Slice<BikesGetResponseDto> conveterToDtoSlice(Slice<Bike> getBikes) {
-        return getBikes.map(getBike -> BikesGetResponseDto.builder()
-            .bikeId(getBike.getId())
-            .memberId(getBike.getMemberId())
-            .bikeModelId(getBike.getBikeModelId())
-            .nickName(getBike.getNickName())
-            .bikeStatus(String.valueOf(getBike.getStatus()))
-            .createdAt(getBike.getCreatedAt())
-            .build());
     }
 
 }
