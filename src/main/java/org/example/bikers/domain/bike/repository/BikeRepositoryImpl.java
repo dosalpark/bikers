@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.Bike;
 import org.example.bikers.domain.bike.entity.BikeStatus;
@@ -48,6 +49,33 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                 bike.status.ne(BikeStatus.DELETE)
             )
             .fetch();
+    }
+
+    @Override
+    public MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId) {
+        return queryFactory.select(
+                Projections.constructor(MyBikeGetResponseDto.class,
+                    bike.id,
+                    bikeModel.manufacturer,
+                    bikeModel.name,
+                    bikeModel.year,
+                    bikeModel.bikeCategory,
+                    bikeModel.displacement,
+                    bike.nickName,
+                    bike.bikeSerialNumber,
+                    bike.mileage,
+                    bike.purchaseDate,
+                    bike.sellDate,
+                    bike.status,
+                    bike.visibility)
+            ).from(bike)
+            .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
+            .where(
+                bike.memberId.eq(memberId),
+                bike.id.eq(bikeId),
+                bike.status.ne(BikeStatus.DELETE)
+            )
+            .fetchOne();
     }
 
 

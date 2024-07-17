@@ -5,6 +5,7 @@ import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
@@ -42,8 +43,11 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public MyBikeGetResponseDto getMyBikeById(Long memberId, Long bikeId) {
-        Bike getBike = findByMyBike(memberId, bikeId);
-        return converterToDto(getBike);
+        MyBikeGetResponseDto getMyBike = bikeRepository.getMyBike(memberId, bikeId);
+        if (Objects.isNull(getMyBike)) {
+            throw new NotFoundException(BIKE_NOT_FOUND);
+        }
+        return getMyBike;
     }
 
     @Transactional(readOnly = true)
@@ -105,20 +109,6 @@ public class BikeService {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE));
-    }
-
-    private MyBikeGetResponseDto converterToDto(Bike getBike) {
-        return MyBikeGetResponseDto.builder()
-            .bikeId(getBike.getId())
-            .bikeModelId(getBike.getBikeModelId())
-            .nickName(getBike.getNickName())
-            .bikeSerialNumber(getBike.getBikeSerialNumber())
-            .mileage(getBike.getMileage())
-            .purchaseDate(getBike.getPurchaseDate())
-            .sellDate(getBike.getSellDate())
-            .bikeStatus(String.valueOf(getBike.getStatus()))
-            .visibility(getBike.isVisibility())
-            .build();
     }
 
     private Slice<BikesGetResponseDto> conveterToDtoSlice(Slice<Bike> getBikes) {
