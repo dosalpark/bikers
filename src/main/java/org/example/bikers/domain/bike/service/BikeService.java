@@ -70,6 +70,9 @@ public class BikeService {
     @Transactional
     public void updateMyBikeMileage(Long memberId, Long bikeId, int mileage) {
         Bike getBike = findByMyBike(memberId, bikeId);
+        if (getBike.getStatus().equals(BikeStatus.SELL)) {
+            throw new IllegalArgumentException("판매한 바이크는 키로수를 변경할 수 없습니다");
+        }
         if (getBike.getMileage() >= mileage) {
             throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
         }
