@@ -1,7 +1,12 @@
 package org.example.bikers.domain.bike.repository;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.DateTimePath;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
@@ -9,10 +14,12 @@ import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.BikeStatus;
 import org.example.bikers.domain.bike.entity.QBike;
+import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.QBikeModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class BikeRepositoryImpl implements BikeRepositoryCustom {
@@ -95,7 +102,7 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             )
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize() + 1)
-            .orderBy(bike.createdAt.desc())
+            .orderBy(getOrder(pageable))
             .fetch();
 
         boolean hasNext = getBikes.size() == pageable.getPageSize() + 1;
@@ -104,6 +111,25 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             getBikes.remove(pageable.getPageSize());
         }
         return new SliceImpl<>(getBikes, pageable, hasNext);
+    }
+
+    private OrderSpecifier<?> getOrder(Pageable pageable) {
+        Sort.Order order = pageable.getSort().get().findFirst().orElse(null);
+        Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
+
+        PathBuilder<BikeModel> path = new PathBuilder<>(BikeModel.class, "bikeModel");
+        DateTimePath<LocalDateTime> dateTimePath;
+
+        switch (order.getProperty()) {
+            case "createdAt":
+                dateTimePath = path.getDateTime("createdAt", LocalDateTime.class);
+                return new OrderSpecifier<>(direction, dateTimePath);
+            case "modifiedAt":
+                dateTimePath = path.getDateTime("modifiedAt", LocalDateTime.class);
+                return new OrderSpecifier<>(direction, dateTimePath);
+            default:
+                throw new IllegalArgumentException("정렬기준이 정확하지 않습니다");
+        }
     }
 
 }
