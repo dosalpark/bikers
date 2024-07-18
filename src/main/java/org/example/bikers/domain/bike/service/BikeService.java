@@ -59,8 +59,10 @@ public class BikeService {
         return getMyBikes;
     }
 
-    public Slice<BikesGetResponseDto> getBikes(Pageable pageable) {
-        Slice<BikesGetResponseDto> getBikes = bikeRepository.getBikes(pageable);
+    public Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
+        Integer year, String email) {
+        Slice<BikesGetResponseDto> getBikes = bikeRepository.getBikes(pageable, name, manufacturer,
+            year, email);
         if (getBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }

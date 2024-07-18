@@ -13,6 +13,7 @@ public interface BikeRepositoryCustom {
 
     MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId);
 
-    Slice<BikesGetResponseDto> getBikes(Pageable pageable);
+    Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
+        Integer year, String email);
 
 }

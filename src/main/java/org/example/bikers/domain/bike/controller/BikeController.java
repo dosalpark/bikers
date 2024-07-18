@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -73,9 +74,17 @@ public class BikeController {
 
     @GetMapping("/bikes/visible")
     public ResponseEntity<CommonResponseDto<Slice<BikesGetResponseDto>>> getBikes(
-        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-
-        Slice<BikesGetResponseDto> responseDtoList = bikeService.getBikes(pageable);
+        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String manufacturer,
+        @RequestParam(required = false) Integer year,
+        @RequestParam(required = false) String email) {
+        Slice<BikesGetResponseDto> responseDtoList = bikeService.getBikes(
+            pageable,
+            name,
+            manufacturer,
+            year,
+            email);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
