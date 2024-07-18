@@ -135,7 +135,7 @@ Bike manage application
 <details>
 <summary>Jwt RefreshToken 수정 <a href="https://pshistory.tistory.com/94" target="_blank">[블로그]</a></summary>
 <div markdown="1">  
-  
+
   ### 수정이유
   Redis에 RefreshToken을 저장할 때 변동성이 있는 RefreshToken을 key값으로 사용하여 사용자가 같은 ID로 계속 로그인 한다면 기존 RefreshToken이 갱신되는게 아니라 Redis에 새로운 RefreshToken이 저장됨
 
@@ -230,6 +230,166 @@ public String createRefreshToken(Long userId, String email) {
         ...
     }
   ```
+
+</div>
+</details>
+
+<details>
+<summary>QueryDsl + 검색기능 적용 <a href="https://pshistory.tistory.com/60" target="_blank">[블로그_QueryDsl]</a></summary>
+<div markdown="1">  
+  
+   ### 적용이유
+   JPQL로 작성했을때의 오탈자 체크 및 타입체크의 귀찮음이 발생해 오탈자, 타입체크를 IDE에서 지원하는 QueryDsl 적용
+
+   (IntelliJ CE 버전 사용으로 쿼리메소드 작성에도 약간 귀찮음이 있어서 도입한 이유도 있음..)
+
+   다른이용자의 Bike를 확인 할 때 원하는 조건의 Bike만 확인 하고 싶을수도 있다는 판단하에 BooleanExpression을 통해 검색기능 적용
+
+   ```
+	// BikeRepositoryImpl.java
+ 	// QueryDsl 적용 전, 검색기능 적용 전 
+
+	@Override
+    	public Slice<BikesGetResponseDto> findAllPagable(Pageable pageable) {
+        	CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+	
+	        Order order = pageable.getSort().stream().findFirst().orElse(null);
+	        String orderBuild = " ORDER BY b." + order.getProperty() + " " + order.getDirection();
+
+	        TypedQuery<jakarta.persistence.Tuple> query = entityManager.createQuery(
+	            "SELECT b.id, " 
+		         + "b.memberId, " 
+		         + "bm.manufacturer, " 
+		         + "bm.name, " 
+		         + "bm.year, " 
+		         + "bm.bikeCategory, " 
+		         + "bm.displacement, " 
+		         + "b.nickName, " 
+		         + "b.status, " 
+		         + "b.createdAt " 
+		         + "FROM Bike b LEFT JOIN BikeModel bm ON b.bikeModelId = bm.id " 
+		         + "WHERE b.status != 'DELETE' AND b.visibility = true "
+	                + orderBuild, jakarta.persistence.Tuple.class);
+	        query.setFirstResult((int) pageable.getOffset());
+	        query.setMaxResults(pageable.getPageSize() + 1);
+	
+	        List<jakarta.persistence.Tuple> result = query.getResultList();
+	        boolean hasNext = result.size() == pageable.getPageSize() + 1;
+	
+	        if (hasNext) {
+	            result.remove(pageable.getPageSize());
+	        }
+	        Slice<jakarta.persistence.Tuple> a = new SliceImpl<>(result, pageable, hasNext);
+	        return conveterToDtoSlice(a);
+    	}
+
+   ```	
+  QueryDsl 도입 전에는 문자열로 쿼리를 직접 작성해야하므로 실행해서 런타임 오류로만 쿼리가 잘못됬는지 확인이 필요했음
+
+  ```
+	// BikeRepositoryImpl.java
+ 	// QueryDsl 적용 후, 검색기능 적용 후
+
+	@Override
+	public Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
+        Integer year, String email, String status) {
+	        List<BikesGetResponseDto> getBikes = queryFactory.select(
+	                Projections.constructor(BikesGetResponseDto.class,
+	                    bike.id,
+	                    member.email,
+	                    bikeModel.manufacturer,
+	                    bikeModel.name,
+	                    bikeModel.year,
+	                    bikeModel.bikeCategory,
+	                    bikeModel.displacement,
+	                    bike.nickName,
+	                    bike.status,
+	                    bike.createdAt)
+	            ).from(bike)
+	            .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
+	            .leftJoin(member).on(bike.memberId.eq(member.id))
+	            .where(
+	                bike.visibility.eq(true),
+	                statusNe(status),
+	                bikeModelNameEq(name),
+	                manufacturerEq(manufacturer),
+	                bikeModelYearEq(year),
+	                ownerEmailEq(email)
+	            )
+	            .offset(pageable.getOffset())
+	            .limit(pageable.getPageSize() + 1)
+	            .orderBy(getOrder(pageable))
+	            .fetch();
+	
+	        boolean hasNext = getBikes.size() == pageable.getPageSize() + 1;
+	
+	        if (hasNext) {
+	            getBikes.remove(pageable.getPageSize());
+	        }
+	        return new SliceImpl<>(getBikes, pageable, hasNext);
+  	}
+  ```
+  QueryDsl 도입 후에는 코드를 통해서 쿼리를 작성하기에 컴파일 단계에서 오탈자, 타입오류 체크가 가능해짐
+
+  (QueryDsl 또한 JPA를 이용하는 방식으로 실행속도는 크게 달라지진 않음)
+
+  이전에는 Tuple로 반환받아서 Dto로 변환작업을 했었는데 불필요한 단계를 줄이고자 생성자로 Projections 적용해서 속도 및 불필요한 코드를 줄임
+  
+  방법에는 생성자와 필드, Bean이 있는데 Bean 방식은 Dto에 Setter를 적용해야 하며, 필드는 필드명이 다르다면 as()를 통해서 맞춰줘야 함
+  
+  생성자는 순서만 맞추면되서 생성자 방식으로 적용 
+
+  <a href="https://pshistory.tistory.com/61" target="_blank">[Projection 관련 작성글]
+
+
+  ```
+	private OrderSpecifier<?> getOrder(Pageable pageable) {
+	        Sort.Order order = pageable.getSort().get().findFirst().orElse(null);
+	        Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
+	
+	        PathBuilder<BikeModel> path = new PathBuilder<>(BikeModel.class, "bikeModel");
+	        DateTimePath<LocalDateTime> dateTimePath;
+	
+	        switch (order.getProperty()) {
+	            case "createdAt":
+	                dateTimePath = path.getDateTime("createdAt", LocalDateTime.class);
+	                return new OrderSpecifier<>(direction, dateTimePath);
+	            case "modifiedAt":
+	                dateTimePath = path.getDateTime("modifiedAt", LocalDateTime.class);
+	                return new OrderSpecifier<>(direction, dateTimePath);
+	            default:
+	                throw new IllegalArgumentException("정렬기준이 정확하지 않습니다");
+	        }
+	    }
+  ```
+  정렬기능은 위와 같이 리턴값이 OrderSpecifier인 getOrder 메소드를 생성해서 입력되는 값에 따라서 다르게 정렬 할 수 있도록 설정
+
+  ```
+	private BooleanExpression bikeModelNameEq(String name) {
+	        return StringUtils.hasText(name) ? bikeModel.name.eq(name) : null;
+	}	
+	
+	private BooleanExpression manufacturerEq(String manufacturer) {
+		return StringUtils.hasText(manufacturer) ?
+	    	bikeModel.manufacturer.eq(Manufacturer.valueOf(manufacturer.toUpperCase())) : null;
+	}
+	
+	private BooleanExpression bikeModelYearEq(Integer year) {
+		return year != null ? bikeModel.year.eq(year) : null;
+	}
+
+	private BooleanExpression ownerEmailEq(String email) {
+	        return StringUtils.hasText(email) ? member.email.eq(email) : null;
+    	}
+	
+    	private Predicate statusNe(String bikeStatus) {
+	        return StringUtils.hasText(bikeStatus) ?
+    		bike.status.ne(BikeStatus.valueOf(bikeStatus)) : null;
+    	}
+  ```
+
+  검색값은 Controller에서 require = false 옵션으로 받아서 위와 같은 메소드를 거쳐서 이용자가 입력했다면 BooleanExpression을 where절에 추가하고 입력하지 않았다면 null값으로 입력해서 하나의 쿼리를 동적으로 사용 할 수 있도록 설정
+  
 
 </div>
 </details>
