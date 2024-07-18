@@ -16,7 +16,7 @@ import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 public class BikesGetResponseDto {
 
     private Long bikeId;
-    private Long memberId;
+    private String ownerEmail;
     private Manufacturer manufacturer;
     private String bikeModelName;
     private int year;

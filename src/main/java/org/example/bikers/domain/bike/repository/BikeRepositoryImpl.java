@@ -16,6 +16,7 @@ import org.example.bikers.domain.bike.entity.BikeStatus;
 import org.example.bikers.domain.bike.entity.QBike;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.QBikeModel;
+import org.example.bikers.domain.member.entity.QMember;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -27,6 +28,7 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QBike bike = QBike.bike;
     private final QBikeModel bikeModel = QBikeModel.bikeModel;
+    private final QMember member = QMember.member;
 
 
     @Override
@@ -85,7 +87,7 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
         List<BikesGetResponseDto> getBikes = queryFactory.select(
                 Projections.constructor(BikesGetResponseDto.class,
                     bike.id,
-                    bike.memberId,
+                    member.email,
                     bikeModel.manufacturer,
                     bikeModel.name,
                     bikeModel.year,
@@ -96,6 +98,7 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                     bike.createdAt)
             ).from(bike)
             .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
+            .leftJoin(member).on(bike.memberId.eq(member.id))
             .where(
                 bike.status.ne(BikeStatus.DELETE),
                 bike.visibility.eq(true)
