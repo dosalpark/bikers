@@ -9,11 +9,11 @@ import org.springframework.data.domain.Slice;
 
 public interface BikeRepositoryCustom {
 
-    List<MyBikesGetResponseDto> getMyBikes(Long memberId);
+    List<MyBikesGetResponseDto> getMyBikes(Long memberId, String status);
 
-    MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId);
+    MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId, String status);
 
     Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
-        Integer year, String email);
+        Integer year, String email, String status);
 
 }

@@ -30,6 +30,8 @@ public class BikeService {
     private final BikeRepository bikeRepository;
     private final ApplicationEventPublisher publisher;
 
+    private static final String DELETE_STATUS = "DELETE";
+
     @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
         String bikeSerialNumber, int mileage, LocalDate purchaseDate, boolean isPublic) {
@@ -43,7 +45,7 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public MyBikeGetResponseDto getMyBikeById(Long memberId, Long bikeId) {
-        MyBikeGetResponseDto getMyBike = bikeRepository.getMyBike(memberId, bikeId);
+        MyBikeGetResponseDto getMyBike = bikeRepository.getMyBike(memberId, bikeId, DELETE_STATUS);
         if (Objects.isNull(getMyBike)) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
@@ -52,7 +54,7 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public List<MyBikesGetResponseDto> getMyBikes(Long memberId) {
-        List<MyBikesGetResponseDto> getMyBikes = bikeRepository.getMyBikes(memberId);
+        List<MyBikesGetResponseDto> getMyBikes = bikeRepository.getMyBikes(memberId, DELETE_STATUS);
         if (getMyBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
@@ -62,7 +64,7 @@ public class BikeService {
     public Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
         Integer year, String email) {
         Slice<BikesGetResponseDto> getBikes = bikeRepository.getBikes(pageable, name, manufacturer,
-            year, email);
+            year, email, DELETE_STATUS);
         if (getBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }

@@ -2,6 +2,7 @@ package org.example.bikers.domain.bike.repository;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
@@ -35,7 +36,7 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
 
 
     @Override
-    public List<MyBikesGetResponseDto> getMyBikes(Long memberId) {
+    public List<MyBikesGetResponseDto> getMyBikes(Long memberId, String status) {
         return queryFactory.select(
                 Projections.constructor(MyBikesGetResponseDto.class,
                     bike.id,
@@ -52,13 +53,13 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
             .where(
                 bike.memberId.eq(memberId),
-                bike.status.ne(BikeStatus.DELETE)
+                statusNe(status)
             )
             .fetch();
     }
 
     @Override
-    public MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId) {
+    public MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId, String status) {
         return queryFactory.select(
                 Projections.constructor(MyBikeGetResponseDto.class,
                     bike.id,
@@ -79,15 +80,14 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             .where(
                 bike.memberId.eq(memberId),
                 bike.id.eq(bikeId),
-                bike.status.ne(BikeStatus.DELETE)
+                statusNe(status)
             )
             .fetchOne();
     }
 
-
     @Override
     public Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
-        Integer year, String email) {
+        Integer year, String email, String status) {
         List<BikesGetResponseDto> getBikes = queryFactory.select(
                 Projections.constructor(BikesGetResponseDto.class,
                     bike.id,
@@ -104,8 +104,8 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
             .leftJoin(member).on(bike.memberId.eq(member.id))
             .where(
-                bike.status.ne(BikeStatus.DELETE),
                 bike.visibility.eq(true),
+                statusNe(status),
                 bikeModelNameEq(name),
                 manufacturerEq(manufacturer),
                 bikeModelYearEq(year),
@@ -139,6 +139,11 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
 
     private BooleanExpression ownerEmailEq(String email) {
         return StringUtils.hasText(email) ? member.email.eq(email) : null;
+    }
+
+    private Predicate statusNe(String bikeStatus) {
+        return StringUtils.hasText(bikeStatus) ?
+            bike.status.ne(BikeStatus.valueOf(bikeStatus)) : null;
     }
 
     private OrderSpecifier<?> getOrder(Pageable pageable) {
