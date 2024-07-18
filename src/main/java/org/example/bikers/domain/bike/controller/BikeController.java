@@ -13,10 +13,10 @@ import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -72,30 +72,19 @@ public class BikeController {
             .body(CommonResponseDto.success(responseDtoList));
     }
 
-    @GetMapping("/bikes/other")
+    @GetMapping("/bikes/visible")
     public ResponseEntity<CommonResponseDto<Slice<BikesGetResponseDto>>> getBikes(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "createdAt") String orderBy,
-        @RequestParam(defaultValue = "desc") String direction) {
-
-        if (page < 0) {
-            page = 0;
-        }
-        if (size < 0) {
-            size = 10;
-        }
-        if (!validationOrderBy(orderBy)) {
-            orderBy = "createdAt";
-        }
-        if (!validationDirection(direction)) {
-            direction = "desc";
-        }
-
-        Direction sortDirection = Direction.fromString(direction);
-        Pageable pageable = PageRequest.of(page, size, sortDirection, orderBy);
-
-        Slice<BikesGetResponseDto> responseDtoList = bikeService.getBikes(pageable);
+        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String manufacturer,
+        @RequestParam(required = false) Integer year,
+        @RequestParam(required = false) String email) {
+        Slice<BikesGetResponseDto> responseDtoList = bikeService.getBikes(
+            pageable,
+            name,
+            manufacturer,
+            year,
+            email);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
@@ -149,15 +138,6 @@ public class BikeController {
             bikeId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    private boolean validationOrderBy(String orderBy) {
-        return orderBy.equals("createdAt") | orderBy.equals("modifiedAt") | orderBy.equals(
-            "status");
-    }
-
-    private boolean validationDirection(String direction) {
-        return direction.equals("asc") | direction.equals("desc");
     }
 
 }

@@ -1,11 +1,19 @@
 package org.example.bikers.domain.bike.repository;
 
-import org.example.bikers.domain.bike.entity.Bike;
+import java.util.List;
+import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface BikeRepositoryCustom {
 
-    Slice<Bike> findAllPagable(Pageable pageable);
+    List<MyBikesGetResponseDto> getMyBikes(Long memberId, String status);
+
+    MyBikeGetResponseDto getMyBike(Long memberId, Long bikeId, String status);
+
+    Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
+        Integer year, String email, String status);
 
 }

@@ -4,8 +4,8 @@ import static org.example.bikers.global.exception.ErrorCode.BIKE_NOT_FOUND;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
@@ -30,6 +30,8 @@ public class BikeService {
     private final BikeRepository bikeRepository;
     private final ApplicationEventPublisher publisher;
 
+    private static final String DELETE_STATUS = "DELETE";
+
     @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
         String bikeSerialNumber, int mileage, LocalDate purchaseDate, boolean isPublic) {
@@ -43,31 +45,38 @@ public class BikeService {
 
     @Transactional(readOnly = true)
     public MyBikeGetResponseDto getMyBikeById(Long memberId, Long bikeId) {
-        Bike getBike = findByMyBike(memberId, bikeId);
-        return converterToDto(getBike);
+        MyBikeGetResponseDto getMyBike = bikeRepository.getMyBike(memberId, bikeId, DELETE_STATUS);
+        if (Objects.isNull(getMyBike)) {
+            throw new NotFoundException(BIKE_NOT_FOUND);
+        }
+        return getMyBike;
     }
 
     @Transactional(readOnly = true)
     public List<MyBikesGetResponseDto> getMyBikes(Long memberId) {
-        List<Bike> getBikes = bikeRepository.findAllByMemberIdEqualsAndStatusNot(memberId,
-            BikeStatus.DELETE);
-        if (getBikes.isEmpty()) {
+        List<MyBikesGetResponseDto> getMyBikes = bikeRepository.getMyBikes(memberId, DELETE_STATUS);
+        if (getMyBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
-        return converterToDtoList(getBikes);
+        return getMyBikes;
     }
 
-    public Slice<BikesGetResponseDto> getBikes(Pageable pageable) {
-        Slice<Bike> getBikes = bikeRepository.findAllPagable(pageable);
+    public Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
+        Integer year, String email) {
+        Slice<BikesGetResponseDto> getBikes = bikeRepository.getBikes(pageable, name, manufacturer,
+            year, email, DELETE_STATUS);
         if (getBikes.isEmpty()) {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
-        return conveterToDtoSlice(getBikes);
+        return getBikes;
     }
 
     @Transactional
     public void updateMyBikeMileage(Long memberId, Long bikeId, int mileage) {
         Bike getBike = findByMyBike(memberId, bikeId);
+        if (getBike.getStatus().equals(BikeStatus.SELL)) {
+            throw new IllegalArgumentException("판매한 바이크는 키로수를 변경할 수 없습니다");
+        }
         if (getBike.getMileage() >= mileage) {
             throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
         }
@@ -107,47 +116,6 @@ public class BikeService {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE));
-    }
-
-    private MyBikeGetResponseDto converterToDto(Bike getBike) {
-        return MyBikeGetResponseDto.builder()
-            .bikeId(getBike.getId())
-            .bikeModelId(getBike.getBikeModelId())
-            .nickName(getBike.getNickName())
-            .bikeSerialNumber(getBike.getBikeSerialNumber())
-            .mileage(getBike.getMileage())
-            .purchaseDate(getBike.getPurchaseDate())
-            .sellDate(getBike.getSellDate())
-            .bikeStatus(String.valueOf(getBike.getStatus()))
-            .visibility(getBike.isVisibility())
-            .build();
-    }
-
-    private List<MyBikesGetResponseDto> converterToDtoList(List<Bike> getBikes) {
-        List<MyBikesGetResponseDto> responseDtoList = new ArrayList<>();
-        for (Bike getBike : getBikes) {
-            MyBikesGetResponseDto responseDto = MyBikesGetResponseDto.builder()
-                .bikeId(getBike.getId())
-                .bikeModelId(getBike.getBikeModelId())
-                .nickName(getBike.getNickName())
-                .mileage(getBike.getMileage())
-                .bikeStatus(String.valueOf(getBike.getStatus()))
-                .visibility(getBike.isVisibility())
-                .build();
-            responseDtoList.add(responseDto);
-        }
-        return responseDtoList;
-    }
-
-    private Slice<BikesGetResponseDto> conveterToDtoSlice(Slice<Bike> getBikes) {
-        return getBikes.map(getBike -> BikesGetResponseDto.builder()
-            .bikeId(getBike.getId())
-            .memberId(getBike.getMemberId())
-            .bikeModelId(getBike.getBikeModelId())
-            .nickName(getBike.getNickName())
-            .bikeStatus(String.valueOf(getBike.getStatus()))
-            .createdAt(getBike.getCreatedAt())
-            .build());
     }
 
 }
