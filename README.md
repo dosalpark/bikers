@@ -235,7 +235,7 @@ public String createRefreshToken(Long userId, String email) {
 </details>
 
 <details>
-<summary>QueryDsl + 검색기능 적용 <a href="https://pshistory.tistory.com/60" target="_blank">[블로그_QueryDsl]</a></summary>
+<summary>QueryDsl + 검색기능 적용 <a href="https://pshistory.tistory.com/60" target="_blank">[블로그_QueryDsl]</a> / <a href="https://pshistory.tistory.com/91" target="_blank">[블로그_검색기능]</a></summary>
 <div markdown="1">  
   
    ### 적용이유
