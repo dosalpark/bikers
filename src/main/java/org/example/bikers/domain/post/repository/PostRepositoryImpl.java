@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.comment.entity.QComment;
+import org.example.bikers.domain.post.dto.PostGetResponseDto;
 import org.example.bikers.domain.post.dto.PostsGetResponseDto;
 import org.example.bikers.domain.post.entity.Post;
 import org.example.bikers.domain.post.entity.PostStatus;
@@ -55,6 +56,24 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         }
 
         return new SliceImpl<>(getPosts, pageable, hasNext);
+    }
+
+    @Override
+    public PostGetResponseDto getPost(Long postId, String status) {
+        return queryFactory.select(
+                Projections.constructor(PostGetResponseDto.class,
+                    post.memberId,
+                    post.title,
+                    post.content,
+                    post.createdAt,
+                    post.modifiedAt)
+            )
+            .from(post)
+            .where(
+                post.id.eq(postId),
+                statusNe(status)
+            )
+            .fetchOne();
     }
 
     private BooleanExpression statusNe(String status) {
