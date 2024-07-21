@@ -21,6 +21,8 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    private static final String DELETE_STATUS = "DELETE";
+
     @Transactional
     public void createPost(Long memberId, String title, String content) {
         Post newPost = new Post(memberId, title, content);
@@ -34,12 +36,12 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<PostsGetResponseDto> getPost(Pageable pageable) {
-        Slice<Post> getPosts = postRepository.findAllPagable(pageable);
+    public Slice<PostsGetResponseDto> getPosts(Pageable pageable) {
+        Slice<PostsGetResponseDto> getPosts = postRepository.getPosts(pageable, DELETE_STATUS);
         if (getPosts.isEmpty()) {
             throw new NotFoundException(POST_NOT_FOUND);
         }
-        return converterDtoSlice(getPosts);
+        return getPosts;
     }
 
     @Transactional
@@ -85,15 +87,6 @@ public class PostService {
             .createdAt(getPost.getCreatedAt())
             .modifiedAt(getPost.getModifiedAt())
             .build();
-    }
-
-    private Slice<PostsGetResponseDto> converterDtoSlice(Slice<Post> getPosts) {
-        return getPosts.map(getPost -> PostsGetResponseDto.builder()
-            .postId(getPost.getId())
-            .title(getPost.getTitle())
-            .memberId(getPost.getMemberId())
-            .createdAt(getPost.getCreatedAt())
-            .build());
     }
 
 }
