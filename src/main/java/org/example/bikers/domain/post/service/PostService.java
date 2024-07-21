@@ -40,8 +40,9 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<PostsGetResponseDto> getPosts(Pageable pageable) {
-        Slice<PostsGetResponseDto> getPosts = postRepository.getPosts(pageable, DELETE_STATUS);
+    public Slice<PostsGetResponseDto> getPosts(Pageable pageable, String email, String title) {
+        Slice<PostsGetResponseDto> getPosts = postRepository.getPosts(pageable, email, title,
+            DELETE_STATUS);
         if (getPosts.isEmpty()) {
             throw new NotFoundException(POST_NOT_FOUND);
         }

@@ -7,7 +7,8 @@ import org.springframework.data.domain.Slice;
 
 public interface PostRepositoryCustom {
 
-    Slice<PostsGetResponseDto> getPosts(Pageable pageable, String status);
+    Slice<PostsGetResponseDto> getPosts(Pageable pageable, String email, String title,
+        String status);
 
     PostGetResponseDto getPost(Long postId, String status);
 }

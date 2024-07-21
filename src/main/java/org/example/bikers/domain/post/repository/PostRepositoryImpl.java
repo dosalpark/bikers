@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.comment.entity.QComment;
+import org.example.bikers.domain.member.entity.QMember;
 import org.example.bikers.domain.post.dto.PostGetResponseDto;
 import org.example.bikers.domain.post.dto.PostsGetResponseDto;
 import org.example.bikers.domain.post.entity.Post;
@@ -29,9 +30,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QPost post = QPost.post;
     private final QComment comment = QComment.comment;
+    private final QMember member = QMember.member;
 
     @Override
-    public Slice<PostsGetResponseDto> getPosts(Pageable pageable, String status) {
+    public Slice<PostsGetResponseDto> getPosts(Pageable pageable, String email, String title,
+        String status) {
         List<PostsGetResponseDto> getPosts = queryFactory.select(
                 Projections.constructor(PostsGetResponseDto.class,
                     post.id,
@@ -42,6 +45,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             )
             .from(post)
             .where(
+                emailEq(email),
+                titleContainsIgnoreCase(title),
                 statusNe(status)
             )
             .offset(pageable.getOffset())
@@ -79,6 +84,17 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private BooleanExpression statusNe(String status) {
         return StringUtils.hasText(status) ?
             post.status.ne(PostStatus.valueOf(status)) : null;
+    }
+
+    private BooleanExpression emailEq(String email) {
+        return StringUtils.hasText(email) ?
+            post.memberId.eq(
+                queryFactory.select(member.id).from(member).where(member.email.eq(email)))
+            : null;
+    }
+
+    private BooleanExpression titleContainsIgnoreCase(String title) {
+        return StringUtils.hasText(title) ? post.title.containsIgnoreCase(title) : null;
     }
 
     private JPAQuery<Long> getCommentCountByPostId(NumberPath<Long> id) {

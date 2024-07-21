@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -52,8 +53,10 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<CommonResponseDto<Slice<PostsGetResponseDto>>> getPosts(
-        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        Slice<PostsGetResponseDto> responseDtoList = postService.getPosts(pageable);
+        @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
+        @RequestParam(required = false) String email,
+        @RequestParam(required = false) String title) {
+        Slice<PostsGetResponseDto> responseDtoList = postService.getPosts(pageable, email, title);
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
     }
