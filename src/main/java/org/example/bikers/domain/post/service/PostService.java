@@ -3,6 +3,7 @@ package org.example.bikers.domain.post.service;
 import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_POST;
 import static org.example.bikers.global.exception.ErrorCode.POST_NOT_FOUND;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.post.dto.PostGetResponseDto;
 import org.example.bikers.domain.post.dto.PostsGetResponseDto;
@@ -21,6 +22,8 @@ public class PostService {
 
     private final PostRepository postRepository;
 
+    private static final String DELETE_STATUS = "DELETE";
+
     @Transactional
     public void createPost(Long memberId, String title, String content) {
         Post newPost = new Post(memberId, title, content);
@@ -29,17 +32,21 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostGetResponseDto getPostById(Long postId) {
-        Post getPost = findByPost(postId);
-        return converterDto(getPost);
+        PostGetResponseDto getPost = postRepository.getPost(postId, DELETE_STATUS);
+        if (Objects.isNull(getPost)) {
+            throw new NotFoundException(NO_SUCH_POST);
+        }
+        return getPost;
     }
 
     @Transactional(readOnly = true)
-    public Slice<PostsGetResponseDto> getPost(Pageable pageable) {
-        Slice<Post> getPosts = postRepository.findAllPagable(pageable);
+    public Slice<PostsGetResponseDto> getPosts(Pageable pageable, String email, String title) {
+        Slice<PostsGetResponseDto> getPosts = postRepository.getPosts(pageable, email, title,
+            DELETE_STATUS);
         if (getPosts.isEmpty()) {
             throw new NotFoundException(POST_NOT_FOUND);
         }
-        return converterDtoSlice(getPosts);
+        return getPosts;
     }
 
     @Transactional
@@ -75,25 +82,6 @@ public class PostService {
         if (loginMemberId != postOwnerId) {
             throw new IllegalArgumentException("작성자만 수정 및 삭제 할 수 있습니다.");
         }
-    }
-
-    private PostGetResponseDto converterDto(Post getPost) {
-        return PostGetResponseDto.builder()
-            .memberId(getPost.getMemberId())
-            .title(getPost.getTitle())
-            .content(getPost.getContent())
-            .createdAt(getPost.getCreatedAt())
-            .modifiedAt(getPost.getModifiedAt())
-            .build();
-    }
-
-    private Slice<PostsGetResponseDto> converterDtoSlice(Slice<Post> getPosts) {
-        return getPosts.map(getPost -> PostsGetResponseDto.builder()
-            .postId(getPost.getId())
-            .title(getPost.getTitle())
-            .memberId(getPost.getMemberId())
-            .createdAt(getPost.getCreatedAt())
-            .build());
     }
 
 }

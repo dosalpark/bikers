@@ -1,11 +1,14 @@
 package org.example.bikers.domain.post.repository;
 
-import org.example.bikers.domain.post.entity.Post;
+import org.example.bikers.domain.post.dto.PostGetResponseDto;
+import org.example.bikers.domain.post.dto.PostsGetResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface PostRepositoryCustom {
 
-    Slice<Post> findAllPagable(Pageable pageable);
+    Slice<PostsGetResponseDto> getPosts(Pageable pageable, String email, String title,
+        String status);
 
+    PostGetResponseDto getPost(Long postId, String status);
 }
