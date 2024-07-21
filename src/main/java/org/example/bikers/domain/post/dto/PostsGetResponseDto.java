@@ -14,7 +14,7 @@ public class PostsGetResponseDto {
 
     private Long postId;
     private String title;
-    private Long memberId;
+    private String email;
     private Long commentCount;
     private LocalDateTime createdAt;
 

@@ -39,11 +39,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 Projections.constructor(PostsGetResponseDto.class,
                     post.id,
                     post.title,
-                    post.memberId,
+                    member.email,
                     getCommentCountByPostId(post.id),
                     post.createdAt)
             )
             .from(post)
+            .leftJoin(member).on(post.memberId.eq(member.id))
             .where(
                 emailEq(email),
                 titleContainsIgnoreCase(title),
@@ -67,13 +68,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public PostGetResponseDto getPost(Long postId, String status) {
         return queryFactory.select(
                 Projections.constructor(PostGetResponseDto.class,
-                    post.memberId,
+                    member.email,
                     post.title,
                     post.content,
                     post.createdAt,
                     post.modifiedAt)
             )
             .from(post)
+            .leftJoin(member).on(post.memberId.eq(member.id))
             .where(
                 post.id.eq(postId),
                 statusNe(status)
@@ -87,10 +89,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression emailEq(String email) {
-        return StringUtils.hasText(email) ?
-            post.memberId.eq(
-                queryFactory.select(member.id).from(member).where(member.email.eq(email)))
-            : null;
+        return StringUtils.hasText(email) ? member.email.eq(email) : null;
     }
 
     private BooleanExpression titleContainsIgnoreCase(String title) {
