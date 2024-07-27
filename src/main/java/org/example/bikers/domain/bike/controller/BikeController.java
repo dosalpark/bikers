@@ -98,7 +98,9 @@ public class BikeController {
         bikeService.updateMyBikeMileage(
             userDetails.getMember().getId(),
             bikeId,
-            requestDto.getMileage());
+            requestDto.getMileage(),
+            requestDto.getStartPoint(),
+            requestDto.getGoalPoint());
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

@@ -1,5 +1,6 @@
 package org.example.bikers.domain.bike.dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 
@@ -8,5 +9,9 @@ public class MyBikeUpdateMileageRequestDto {
 
     @Positive(message = "변경된 키로수를 입력해주세요")
     private int mileage;
+    @Nullable
+    private String startPoint;
+    @Nullable
+    private String goalPoint;
 
 }
