@@ -113,6 +113,12 @@ public class BikeService {
         bikeRepository.save(getBike);
     }
 
+    @Transactional(readOnly = true)
+    public Boolean validateByMyBike(Long memberId, Long bikeId) {
+        return bikeRepository.existsByMemberIdEqualsAndIdEqualsAndStatusNot(
+            memberId, bikeId, BikeStatus.DELETE);
+    }
+
     private Bike findByMyBike(Long memberId, Long bikeId) {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->

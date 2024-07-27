@@ -1,6 +1,5 @@
 package org.example.bikers.domain.bike.repository;
 
-import java.util.List;
 import java.util.Optional;
 import org.example.bikers.domain.bike.entity.Bike;
 import org.example.bikers.domain.bike.entity.BikeStatus;
@@ -11,6 +10,6 @@ public interface BikeRepository extends JpaRepository<Bike, Long>, BikeRepositor
     Optional<Bike> findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(Long memberId, Long bikeId,
         BikeStatus status);
 
-    List<Bike> findAllByMemberIdEqualsAndStatusNot(Long memberId, BikeStatus status);
-
+    boolean existsByMemberIdEqualsAndIdEqualsAndStatusNot(Long memberId, Long bikeId,
+        BikeStatus bikeStatus);
 }
