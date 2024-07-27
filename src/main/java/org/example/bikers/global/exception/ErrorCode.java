@@ -11,6 +11,7 @@ public enum ErrorCode {
     MODEL_ALREADY_REGISTERED("409", "BM000003", "이미 등록된 모델입니다."),
     NO_SUCH_BIKE_MODEL("404", "BM000004", "해당하는 바이크모델이 없습니다."),
     NO_BIKE_MODEL_FOUND("404", "BM000005", "조회 할 바이크모델이 없습니다."),
+    NO_BIKE_MILEAGE_FOUND("404", "BM000006", "조회할 변경 이력이 없습니다."),
     NO_SUCH_MEMBER("404", "MB000001", "해당하는 유저가 없습니다."),
     DELETED_MEMBER("404", "MB000002", "탈퇴한 회원 입니다."),
     NO_SUCH_BIKE("404", "BK000001", "해당하는 바이크가 없습니다."),
