@@ -18,7 +18,7 @@ public class BikeMileageRepositoryImpl implements BikeMileageRepositoryCustom {
     public List<BikeMileagesGetResponseDto> getBikeMileages(Long bikeId) {
         return queryFactory.select(
                 Projections.constructor(BikeMileagesGetResponseDto.class,
-                    bikeMileage.bikeId,
+                    bikeMileage.id,
                     bikeMileage.preMileage,
                     bikeMileage.nowMileage,
                     bikeMileage.startPoint,

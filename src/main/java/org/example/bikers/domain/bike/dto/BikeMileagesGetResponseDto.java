@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BikeMileagesGetResponseDto {
 
-    private Long bikeId;
+    private Long bikeMileageId;
     private int preMileage;
     private int nextMileage;
     private String startPoint;
