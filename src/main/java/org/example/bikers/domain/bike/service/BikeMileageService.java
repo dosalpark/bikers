@@ -62,8 +62,8 @@ public class BikeMileageService {
         if (!bikeService.validateByMyBike(memberId, bikeId)) {
             throw new NotFoundException(ErrorCode.NO_SUCH_BIKE);
         }
-        BikeMileage getBikeMileage = bikeMileageRepository.findById(bikeMileageId).orElseThrow(
-            () -> new NotFoundException(NO_SUCH_BIKE_MILEAGE));
+        BikeMileage getBikeMileage = bikeMileageRepository.findByIdAndBikeId(bikeMileageId, bikeId)
+            .orElseThrow(() -> new NotFoundException(NO_SUCH_BIKE_MILEAGE));
 
         if (preMileage != null && nextMileage != null) {
             if (preMileage > nextMileage) {
@@ -97,6 +97,5 @@ public class BikeMileageService {
             mileageEvent.getGoalPoint());
         bikeMileageRepository.save(newBikeMileage);
     }
-
 
 }
