@@ -12,6 +12,7 @@ import org.example.bikers.global.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,6 +68,18 @@ public class BikeMileageController {
             requestDto.getNextMileage(),
             requestDto.getStartPoint(),
             requestDto.getGoalPoint());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/{bikeMileageId}")
+    public ResponseEntity<Void> deleteBikeMileage(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @PathVariable Long bikeMileageId) {
+        bikeMileageService.deleteBikeMileage(
+            userDetails.getMember().getId(),
+            bikeId,
+            bikeMileageId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

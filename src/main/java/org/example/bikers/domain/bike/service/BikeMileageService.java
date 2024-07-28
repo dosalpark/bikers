@@ -1,8 +1,5 @@
 package org.example.bikers.domain.bike.service;
 
-import static org.example.bikers.global.exception.ErrorCode.NO_BIKE_MILEAGE_FOUND;
-import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_BIKE_MILEAGE;
-
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeMileagesGetResponseDto;
@@ -32,7 +29,7 @@ public class BikeMileageService {
         List<BikeMileagesGetResponseDto> getBikeMileages = bikeMileageRepository.getBikeMileages(
             bikeId);
         if (getBikeMileages.isEmpty()) {
-            throw new NotFoundException(NO_BIKE_MILEAGE_FOUND);
+            throw new NotFoundException(ErrorCode.NO_BIKE_MILEAGE_FOUND);
         }
         return getBikeMileages;
     }
@@ -63,7 +60,7 @@ public class BikeMileageService {
             throw new NotFoundException(ErrorCode.NO_SUCH_BIKE);
         }
         BikeMileage getBikeMileage = bikeMileageRepository.findByIdAndBikeId(bikeMileageId, bikeId)
-            .orElseThrow(() -> new NotFoundException(NO_SUCH_BIKE_MILEAGE));
+            .orElseThrow(() -> new NotFoundException(ErrorCode.NO_SUCH_BIKE_MILEAGE));
 
         if (preMileage != null && nextMileage != null) {
             if (preMileage > nextMileage) {
@@ -84,6 +81,16 @@ public class BikeMileageService {
 
         getBikeMileage.update(preMileage, nextMileage, startPoint, goalPoint);
         bikeMileageRepository.save(getBikeMileage);
+    }
+
+    public void deleteBikeMileage(Long memberId, Long bikeId, Long bikeMileageId) {
+        if (!bikeService.validateByMyBike(memberId, bikeId)) {
+            throw new NotFoundException(ErrorCode.NO_SUCH_BIKE);
+        }
+        BikeMileage getBikeMileage = bikeMileageRepository.findByIdAndBikeId(bikeMileageId, bikeId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.NO_SUCH_BIKE_MILEAGE));
+
+        bikeMileageRepository.delete(getBikeMileage);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
