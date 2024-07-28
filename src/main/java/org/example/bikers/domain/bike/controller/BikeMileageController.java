@@ -1,7 +1,9 @@
 package org.example.bikers.domain.bike.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bike.dto.BikeMileageCreateRequestDto;
 import org.example.bikers.domain.bike.dto.BikeMileagesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeMileageService;
 import org.example.bikers.global.dto.CommonResponseDto;
@@ -11,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +34,21 @@ public class BikeMileageController {
             bikeId);
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> createBikeMileage(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @Valid @RequestBody BikeMileageCreateRequestDto requestDto) {
+        bikeMileageService.createBikeMileage(
+            userDetails.getMember().getId(),
+            bikeId,
+            requestDto.getPreMileage(),
+            requestDto.getNextMileage(),
+            requestDto.getStartPoint(),
+            requestDto.getGoalPoint());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }

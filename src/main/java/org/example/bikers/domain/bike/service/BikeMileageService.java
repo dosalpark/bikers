@@ -25,7 +25,7 @@ public class BikeMileageService {
     private final BikeMileageRepository bikeMileageRepository;
     private final BikeService bikeService;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BikeMileagesGetResponseDto> getBikeMileages(Long memberId, Long bikeId) {
         if (!bikeService.validateByMyBike(memberId, bikeId)) {
             throw new NotFoundException(ErrorCode.NO_SUCH_BIKE);
@@ -36,6 +36,24 @@ public class BikeMileageService {
             throw new NotFoundException(NO_BIKE_MILEAGE_FOUND);
         }
         return getBikeMileages;
+    }
+
+    @Transactional
+    public void createBikeMileage(Long memberId, Long bikeId, int preMileage, int nextMileage,
+        String startPoint, String goalPoint) {
+        if (preMileage > nextMileage) {
+            throw new IllegalArgumentException("운행 전 키로수가 더 높습니다.");
+        }
+        if (!bikeService.validateByMyBike(memberId, bikeId)) {
+            throw new NotFoundException(ErrorCode.NO_SUCH_BIKE);
+        }
+        BikeMileage newBikeMileage = new BikeMileage(
+            bikeId,
+            preMileage,
+            nextMileage,
+            startPoint,
+            goalPoint);
+        bikeMileageRepository.save(newBikeMileage);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
