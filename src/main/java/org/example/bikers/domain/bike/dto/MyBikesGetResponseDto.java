@@ -21,7 +21,6 @@ public class MyBikesGetResponseDto {
     private BikeCategory bikeCategory;
     private int displacement;
     private String nickName;
-    private int mileage;
     private BikeStatus bikeStatus;
     private boolean visibility;
 

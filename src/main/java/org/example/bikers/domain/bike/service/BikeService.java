@@ -12,7 +12,6 @@ import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.Bike;
 import org.example.bikers.domain.bike.entity.BikeStatus;
-import org.example.bikers.domain.bike.event.UpdateMileageEvent;
 import org.example.bikers.domain.bike.repository.BikeRepository;
 import org.example.bikers.domain.bikeModel.service.BikeModelService;
 import org.example.bikers.global.exception.customException.NotFoundException;
@@ -34,12 +33,12 @@ public class BikeService {
 
     @Transactional
     public void createMyBike(Long memberId, Long bikeModelId, String nickName,
-        String bikeSerialNumber, int mileage, LocalDate purchaseDate, boolean isPublic) {
+        String bikeSerialNumber, LocalDate purchaseDate, boolean isPublic) {
 
         bikeModelService.validateByBikeModel(bikeModelId);
 
-        Bike newBike = new Bike(memberId, bikeModelId, nickName, bikeSerialNumber, mileage,
-            purchaseDate, isPublic);
+        Bike newBike = new Bike(memberId, bikeModelId, nickName, bikeSerialNumber, purchaseDate,
+            isPublic);
         bikeRepository.save(newBike);
     }
 
@@ -69,24 +68,6 @@ public class BikeService {
             throw new NotFoundException(BIKE_NOT_FOUND);
         }
         return getBikes;
-    }
-
-    @Transactional
-    public void updateMyBikeMileage(Long memberId, Long bikeId, int mileage, String startPoint,
-        String goalPoint) {
-        Bike getBike = findByMyBike(memberId, bikeId);
-        if (getBike.getStatus().equals(BikeStatus.SELL)) {
-            throw new IllegalArgumentException("판매한 바이크는 키로수를 변경할 수 없습니다");
-        }
-        if (getBike.getMileage() >= mileage) {
-            throw new IllegalArgumentException("현재 키로수보다 낮게 변경 할 수 없습니다");
-        }
-        int preMileage = getBike.getMileage();
-        getBike.updateMileage(mileage);
-        bikeRepository.save(getBike);
-
-        publisher.publishEvent(
-            new UpdateMileageEvent(bikeId, preMileage, mileage, startPoint, goalPoint));
     }
 
     @Transactional

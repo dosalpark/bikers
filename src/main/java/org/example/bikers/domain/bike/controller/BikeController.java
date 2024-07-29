@@ -7,7 +7,6 @@ import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeSellDateRequestDto;
-import org.example.bikers.domain.bike.dto.MyBikeUpdateMileageRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeUpdateVisibilityRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.service.BikeService;
@@ -45,7 +44,6 @@ public class BikeController {
             requestDto.getBikeModelId(),
             requestDto.getNickName(),
             requestDto.getBikeSerialNumber().toUpperCase(),
-            requestDto.getMileage(),
             requestDto.getPurchaseDate(),
             requestDto.isVisibility());
 
@@ -88,21 +86,6 @@ public class BikeController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
-    }
-
-    @PatchMapping("/bikes/{bikeId}/mileage")
-    public ResponseEntity<Void> updateMyBikeMileage(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long bikeId,
-        @Valid @RequestBody MyBikeUpdateMileageRequestDto requestDto) {
-        bikeService.updateMyBikeMileage(
-            userDetails.getMember().getId(),
-            bikeId,
-            requestDto.getMileage(),
-            requestDto.getStartPoint(),
-            requestDto.getGoalPoint());
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PatchMapping("/bikes/{bikeId}/visibility")

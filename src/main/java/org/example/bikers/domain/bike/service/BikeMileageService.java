@@ -4,15 +4,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeMileagesGetResponseDto;
 import org.example.bikers.domain.bike.entity.BikeMileage;
-import org.example.bikers.domain.bike.event.UpdateMileageEvent;
 import org.example.bikers.domain.bike.repository.BikeMileageRepository;
 import org.example.bikers.global.exception.ErrorCode;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -91,18 +87,6 @@ public class BikeMileageService {
             .orElseThrow(() -> new NotFoundException(ErrorCode.NO_SUCH_BIKE_MILEAGE));
 
         bikeMileageRepository.delete(getBikeMileage);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void addMileageHistory(UpdateMileageEvent mileageEvent) {
-        BikeMileage newBikeMileage = new BikeMileage(
-            mileageEvent.getBikeId(),
-            mileageEvent.getPreMileage(),
-            mileageEvent.getNowMileage(),
-            mileageEvent.getStartPoint(),
-            mileageEvent.getGoalPoint());
-        bikeMileageRepository.save(newBikeMileage);
     }
 
 }
