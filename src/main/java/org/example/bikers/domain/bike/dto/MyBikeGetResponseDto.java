@@ -23,7 +23,6 @@ public class MyBikeGetResponseDto {
     private int displacement;
     private String nickName;
     private String bikeSerialNumber;
-    private int mileage;
     private LocalDate purchaseDate;
     private LocalDate sellDate;
     private BikeStatus bikeStatus;

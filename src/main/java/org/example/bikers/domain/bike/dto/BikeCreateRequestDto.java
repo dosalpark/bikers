@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
@@ -22,9 +21,6 @@ public class BikeCreateRequestDto {
     @NotEmpty(message = "차대번호를 입력해주세요")
     @Pattern(regexp = "^[a-zA-Z0-9]{17}$", message = "정확한 차대번호를 입력해주세요")
     private String bikeSerialNumber;
-
-    @PositiveOrZero(message = "현재 키로수를 입력해주세요")
-    private int mileage;
 
     @NotNull(message = "구매일을 입력해주세요")
     private LocalDate purchaseDate;

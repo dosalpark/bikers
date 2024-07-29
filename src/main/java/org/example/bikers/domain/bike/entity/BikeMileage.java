@@ -51,4 +51,20 @@ public class BikeMileage {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void update(Integer preMileage, Integer nextMileage, String startPoint,
+        String goalPoint) {
+        if (preMileage != null) {
+            this.preMileage = preMileage;
+        }
+        if (nextMileage != null) {
+            this.nowMileage = nextMileage;
+        }
+        if (startPoint != null) {
+            this.startPoint = startPoint;
+        }
+        if (goalPoint != null) {
+            this.goalPoint = goalPoint;
+        }
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

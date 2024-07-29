@@ -46,7 +46,6 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                     bikeModel.bikeCategory,
                     bikeModel.displacement,
                     bike.nickName,
-                    bike.mileage,
                     bike.status,
                     bike.visibility)
             ).from(bike)
@@ -70,7 +69,6 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                     bikeModel.displacement,
                     bike.nickName,
                     bike.bikeSerialNumber,
-                    bike.mileage,
                     bike.purchaseDate,
                     bike.sellDate,
                     bike.status,

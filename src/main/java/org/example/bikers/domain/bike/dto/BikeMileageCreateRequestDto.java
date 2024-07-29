@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 
 @Getter
-public class MyBikeUpdateMileageRequestDto {
+public class BikeMileageCreateRequestDto {
 
-    @Positive(message = "변경된 키로수를 입력해주세요")
-    private int mileage;
+    @Positive(message = "운행 전 키로수를 입력해주세요")
+    private int preMileage;
+    @Positive(message = "운행 후 키로수를 입력해주세요")
+    private int nextMileage;
     @Nullable
     private String startPoint;
     @Nullable

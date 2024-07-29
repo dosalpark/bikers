@@ -36,9 +36,6 @@ public class Bike {
     private String bikeSerialNumber;
 
     @Column(nullable = false)
-    private int mileage;
-
-    @Column(nullable = false)
     private LocalDate purchaseDate;
 
     @Column
@@ -62,21 +59,15 @@ public class Bike {
 
 
     public Bike(Long memberId, Long bikeModelId, String nickName, String bikeSerialNumber,
-        int mileage, LocalDate purchaseDate, boolean visibility) {
+        LocalDate purchaseDate, boolean visibility) {
         this.memberId = memberId;
         this.bikeModelId = bikeModelId;
         this.nickName = nickName;
         this.bikeSerialNumber = bikeSerialNumber;
-        this.mileage = mileage;
         this.purchaseDate = purchaseDate;
         this.status = BikeStatus.HOLD;
         this.visibility = visibility;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public void updateMileage(int mileage) {
-        this.mileage = mileage;
-        this.modifiedAt = LocalDateTime.now();
     }
 
     public void updateVisibility(boolean visibility) {
