@@ -1,10 +1,11 @@
-package org.example.bikers.global.exception;
+package org.example.bikers.global.handler;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.example.bikers.global.dto.CommonResponseDto;
+import org.example.bikers.global.exception.ErrorCode;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;

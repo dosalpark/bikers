@@ -1,4 +1,4 @@
-package org.example.bikers.global.exception;
+package org.example.bikers.global.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
