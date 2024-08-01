@@ -35,4 +35,10 @@ public class TalkRoom {
         this.name = name;
     }
 
+    public TalkRoom(Long memberId, String roomId, String name) {
+        this.memberId = memberId;
+        this.roomId = roomId;
+        this.name = name;
+    }
+
 }

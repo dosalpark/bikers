@@ -53,5 +53,14 @@ public class TalkRoomService {
             .toList();
     }
 
+    public void joinRoom(Long memberId, String roomId) {
+        TalkRoom getRoom = talkRoomRepository.findFirstByRoomId(roomId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND));
+        if (talkRoomRepository.existsByRoomIdAndMemberId(roomId, memberId)) {
+            throw new IllegalArgumentException("이미 들어가있는 톡방입니다.");
+        }
+        TalkRoom joinTalkRoom = new TalkRoom(memberId, getRoom.getRoomId(), getRoom.getName());
+        talkRoomRepository.save(joinTalkRoom);
+    }
 
 }

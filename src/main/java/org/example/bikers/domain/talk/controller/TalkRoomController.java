@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.dto.TalkRoomCreateRequestDto;
 import org.example.bikers.domain.talk.dto.TalkRoomGetResponseDto;
+import org.example.bikers.domain.talk.dto.TalkRoomJoinRequestDto;
 import org.example.bikers.domain.talk.service.TalkRoomService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
@@ -49,6 +50,14 @@ public class TalkRoomController {
         List<TalkRoomGetResponseDto> responseDtoList = talkRoomService.getRooms(roomName);
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<Void> joinRoom(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody TalkRoomJoinRequestDto requestDto) {
+        talkRoomService.joinRoom(userDetails.getMember().getId(), requestDto.getRoomId());
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
