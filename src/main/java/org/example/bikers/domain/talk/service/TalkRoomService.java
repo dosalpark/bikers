@@ -1,8 +1,12 @@
 package org.example.bikers.domain.talk.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoom;
 import org.example.bikers.domain.talk.repository.TalkRoomRepository;
+import org.example.bikers.global.exception.ErrorCode;
+import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,5 +20,17 @@ public class TalkRoomService {
     public void createRoom(Long memberId, String name) {
         TalkRoom newRoom = new TalkRoom(memberId, name);
         talkRoomRepository.save(newRoom);
+    }
+
+    public List<MyTalkRoomGetResponseDto> getMyRooms(Long memberId) {
+        List<TalkRoom> getMyRooms = talkRoomRepository.findAllByMemberId(memberId);
+        if (getMyRooms.isEmpty()) {
+            throw new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND);
+        }
+
+        return getMyRooms.stream()
+            .map(room -> MyTalkRoomGetResponseDto.builder().id(room.getId()).name(room.getName())
+                .build())
+            .toList();
     }
 }
