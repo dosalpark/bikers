@@ -75,6 +75,7 @@ public class WebSecurityConfig {
         httpSecurity.authorizeHttpRequests(
             (authorizeHttpRequests) -> authorizeHttpRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/ws/talk").permitAll()
                 .requestMatchers("/v1").permitAll()
                 .requestMatchers("/v1/members/**").permitAll()
                 .requestMatchers("/oauth/**").permitAll()
