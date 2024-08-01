@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.dto.TalkRoomCreateRequestDto;
+import org.example.bikers.domain.talk.dto.TalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.service.TalkRoomService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,6 +39,14 @@ public class TalkRoomController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<MyTalkRoomGetResponseDto> responseDtoList = talkRoomService.getMyRooms(
             userDetails.getMember().getId());
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(CommonResponseDto.success(responseDtoList));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CommonResponseDto<List<TalkRoomGetResponseDto>>> getRooms(
+        @RequestParam String roomName) {
+        List<TalkRoomGetResponseDto> responseDtoList = talkRoomService.getRooms(roomName);
         return ResponseEntity.status(HttpStatus.OK)
             .body(CommonResponseDto.success(responseDtoList));
     }

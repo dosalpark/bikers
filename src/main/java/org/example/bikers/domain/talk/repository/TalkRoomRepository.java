@@ -8,4 +8,6 @@ public interface TalkRoomRepository extends JpaRepository<TalkRoom, Long> {
 
     List<TalkRoom> findAllByMemberId(Long memberId);
 
+    List<TalkRoom> findAllByNameContainsIgnoreCase(String roomName);
+
 }
