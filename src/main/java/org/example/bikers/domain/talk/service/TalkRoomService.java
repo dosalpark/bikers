@@ -29,9 +29,11 @@ public class TalkRoomService {
         if (getMyRooms.isEmpty()) {
             throw new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND);
         }
-
         return getMyRooms.stream()
-            .map(room -> MyTalkRoomGetResponseDto.builder().id(room.getId()).name(room.getName())
+            .map(room -> MyTalkRoomGetResponseDto.builder()
+                .id(room.getId())
+                .roomId(room.getRoomId())
+                .name(room.getName())
                 .build())
             .toList();
     }
@@ -43,8 +45,13 @@ public class TalkRoomService {
             throw new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND);
         }
         return getRooms.stream()
-            .map(room -> TalkRoomGetResponseDto.builder().id(room.getId()).name(room.getName())
+            .map(room -> TalkRoomGetResponseDto.builder()
+                .id(room.getId())
+                .roomId(room.getRoomId())
+                .name(room.getName())
                 .build())
             .toList();
     }
+
+
 }
