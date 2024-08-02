@@ -63,4 +63,10 @@ public class TalkRoomService {
         talkRoomRepository.save(joinTalkRoom);
     }
 
+    public void validateMemberInTalkRoom(String roomId, Long memberId) {
+        if (talkRoomRepository.existsByRoomIdAndMemberId(roomId, memberId)) {
+            throw new NotFoundException(ErrorCode.MEMBER_NOT_IN_TALK_ROOM);
+        }
+    }
+
 }

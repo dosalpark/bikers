@@ -6,6 +6,8 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.service.TalkRoomService;
+import org.example.bikers.global.exception.customException.NotFoundException;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -18,16 +20,23 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final TalkRoomService talkRoomService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
         WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-        String email, roomId;
+        Long memberId;
+        String accessToken, email, roomId;
         try {
-            email = getEmailFromRequest(request);
+            accessToken = jwtTokenProvider.getAccessTokenFromRequest(request);
+            Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
+            memberId = memberInfo.get("userId", Long.class);
+            email = memberInfo.get("email", String.class);
             roomId = getRoomIdFromRequest(request);
+
+            talkRoomService.validateMemberInTalkRoom(roomId, memberId);
         } catch (SecurityException | MalformedJwtException | SignatureException |
-                 ExpiredJwtException e) {
+                 ExpiredJwtException | NotFoundException e) {
             return false;
         }
         attributes.put("email", email);
@@ -36,17 +45,17 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
         return true;
     }
 
-    private String getEmailFromRequest(ServerHttpRequest request) {
-        String accessToken = jwtTokenProvider.getAccessTokenFromRequest(request);
-        jwtTokenProvider.validateToken(accessToken);
-        Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
-        return memberInfo.get("email", String.class);
-    }
+//    private String getEmailFromRequest(ServerHttpRequest request) {
+//        String accessToken = jwtTokenProvider.getAccessTokenFromRequest(request);
+//        jwtTokenProvider.validateToken(accessToken);
+//        Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
+//        return memberInfo.get("email", String.class);
+//    }
 
     private String getRoomIdFromRequest(ServerHttpRequest request) {
         String query = request.getURI().getQuery();
         if (query != null && query.contains("RoomId=")) {
-            return query.split("RoomId=")[1].substring(0,36);
+            return query.split("RoomId=")[1].substring(0, 36);
         }
         return null;
     }
