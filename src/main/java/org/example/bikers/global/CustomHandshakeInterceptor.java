@@ -39,6 +39,7 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
                  ExpiredJwtException | NotFoundException e) {
             return false;
         }
+        attributes.put("memberId",memberId);
         attributes.put("email", email);
         attributes.put("roomId", roomId);
 

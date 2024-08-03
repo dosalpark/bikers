@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -17,6 +19,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class WebsocketTalkHandler extends TextWebSocketHandler {
 
     private final Set<WebSocketSession> sessionSet = new HashSet<>();
+    private final ApplicationEventPublisher publisher;
 
 
     @Override
@@ -29,8 +32,6 @@ public class WebsocketTalkHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
         throws Exception {
-        String getPayload = "님이 나가셨습니다.";
-        sendMessage(session, getPayload, true);
         sessionSet.remove(session);
     }
 
@@ -41,11 +42,13 @@ public class WebsocketTalkHandler extends TextWebSocketHandler {
         sendMessage(session, getPayload, false);
     }
 
-    private void sendMessage(WebSocketSession session, String msg, boolean isSystemMessage) {
+    private void sendMessage(WebSocketSession session, String msg,
+        boolean isConnectionEstablished) {
+        String memberId = session.getAttributes().get("memberId").toString();
         String email = session.getAttributes().get("email").toString();
         String roomId = session.getAttributes().get("roomId").toString();
         TextMessage textMessage;
-        if (isSystemMessage) {
+        if (isConnectionEstablished) {
             textMessage = new TextMessage(email + msg);
         } else {
             textMessage = new TextMessage(email + " : " + msg);
@@ -61,6 +64,9 @@ public class WebsocketTalkHandler extends TextWebSocketHandler {
                 throw new RuntimeException(e);
             }
         });
+
+        publisher.publishEvent(
+            new TalkAutoSaveEventDto(Long.parseLong(roomId), Long.parseLong(memberId), msg));
     }
 
 }
