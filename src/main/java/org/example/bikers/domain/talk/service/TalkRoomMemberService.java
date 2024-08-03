@@ -2,13 +2,17 @@ package org.example.bikers.domain.talk.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoomMember;
 import org.example.bikers.domain.talk.repository.TalkRoomMemberRepository;
 import org.example.bikers.global.exception.ErrorCode;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -42,4 +46,14 @@ public class TalkRoomMemberService {
             throw new NotFoundException(ErrorCode.MEMBER_NOT_IN_TALK_ROOM);
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void createRoomAutoJoin(CreateRoomEventDto roomEventDto) {
+        Long roomId = roomEventDto.getRoomId();
+        Long roomCreateMemberId = roomEventDto.getMemberId();
+        TalkRoomMember createRoomMember = new TalkRoomMember(roomId, roomCreateMemberId);
+        talkRoomMemberRepository.save(createRoomMember);
+    }
+
 }
