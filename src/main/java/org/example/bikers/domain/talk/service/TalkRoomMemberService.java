@@ -3,11 +3,13 @@ package org.example.bikers.domain.talk.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoomMember;
 import org.example.bikers.domain.talk.repository.TalkRoomMemberRepository;
 import org.example.bikers.global.exception.ErrorCode;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class TalkRoomMemberService {
 
     private final TalkRoomMemberRepository talkRoomMemberRepository;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional(readOnly = true)
     public List<MyTalkRoomGetResponseDto> getMyRooms(Long memberId) {
@@ -38,6 +41,15 @@ public class TalkRoomMemberService {
         }
         TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getRoomId(), memberId);
         talkRoomMemberRepository.save(joinTalkRoom);
+    }
+
+    @Transactional
+    public void leaveRoom(Long memberId, Long roomId) {
+        TalkRoomMember getRoom = talkRoomMemberRepository.findByRoomIdAndJoinMemberId(roomId,
+            memberId).orElseThrow(() -> new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND));
+        talkRoomMemberRepository.delete(getRoom);
+        String msg = "님이 나갔습니다.";
+        publisher.publishEvent(new LeaveTalkRoomEventDto(roomId, memberId, msg));
     }
 
     @Transactional(readOnly = true)

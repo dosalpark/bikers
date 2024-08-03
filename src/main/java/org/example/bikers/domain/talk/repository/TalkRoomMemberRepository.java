@@ -9,6 +9,8 @@ public interface TalkRoomMemberRepository extends JpaRepository<TalkRoomMember, 
 
     Optional<TalkRoomMember> findByRoomId(Long roomId);
 
+    Optional<TalkRoomMember> findByRoomIdAndJoinMemberId(Long roomId, Long memberId);
+
     boolean existsByRoomIdAndJoinMemberId(Long roomId, Long memberId);
 
 }

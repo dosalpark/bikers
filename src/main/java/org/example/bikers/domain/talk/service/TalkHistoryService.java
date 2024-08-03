@@ -2,6 +2,7 @@ package org.example.bikers.domain.talk.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
 import org.example.bikers.domain.talk.dto.TalkHistoryGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkHistory;
@@ -10,7 +11,10 @@ import org.example.bikers.global.exception.ErrorCode;
 import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +41,17 @@ public class TalkHistoryService {
         Long roomId = talkAutoSaveEventDto.getRoomId();
         Long memberId = talkAutoSaveEventDto.getMemberId();
         String msg = talkAutoSaveEventDto.getMsg();
+
+        TalkHistory talk = new TalkHistory(roomId, memberId, msg);
+        talkHistoryRepository.save(talk);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void leaveTalkRoomNotice(LeaveTalkRoomEventDto leaveTalkRoomEventDto) {
+        Long roomId = leaveTalkRoomEventDto.getRoomId();
+        Long memberId = leaveTalkRoomEventDto.getMemberId();
+        String msg = leaveTalkRoomEventDto.getMsg();
 
         TalkHistory talk = new TalkHistory(roomId, memberId, msg);
         talkHistoryRepository.save(talk);
