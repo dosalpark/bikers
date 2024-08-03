@@ -10,29 +10,29 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
-@Table(name = "talkRooms")
+@Entity
+@Table(name = "talkRoomMembers")
 @NoArgsConstructor
-public class TalkRoom {
+public class TalkRoomMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private Long roomId;
 
     @Column(nullable = false)
-    private Long memberId;
+    private Long joinMemberId;
 
-    @Column
-    private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private LocalDateTime joinTime;
 
-    public TalkRoom(Long memberId, String name) {
-        this.name = name;
-        this.memberId = memberId;
-        this.createdAt = LocalDateTime.now();
+    public TalkRoomMember(Long roomId, Long memberId) {
+        this.roomId = roomId;
+        this.joinMemberId = memberId;
+        this.joinTime = LocalDateTime.now();
     }
 
 }

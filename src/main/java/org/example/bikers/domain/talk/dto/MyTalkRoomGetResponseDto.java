@@ -1,14 +1,16 @@
 package org.example.bikers.domain.talk.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MyTalkRoomGetResponseDto {
 
     private Long id;
-    private String roomId;
+    private Long roomId;
     private String name;
 
 }

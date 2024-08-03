@@ -8,7 +8,6 @@ import lombok.Getter;
 public class TalkRoomGetResponseDto {
 
     private Long id;
-    private String roomId;
     private String name;
 
 }

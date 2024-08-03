@@ -5,6 +5,6 @@ import lombok.Getter;
 @Getter
 public class TalkRoomJoinRequestDto {
 
-    private String roomId;
+    private Long roomId;
 
 }
