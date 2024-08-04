@@ -1,4 +1,4 @@
-package org.example.bikers.global;
+package org.example.bikers.global.handler;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
