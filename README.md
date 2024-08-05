@@ -6,7 +6,7 @@ Bike manage application
 * Jwt AccessToken, RefreshToken 적용 (완료)
 * post, comment, BikeModel, Bike CRUD (완료)
 * 바이크 관리(주행거리 등록, 환경검사 등)
-* 채팅기능 구현
+* 채팅기능 구현 (완료)
 * 투어 등록시 로그인시 등록 위치 기반으로 투어에 대한 알림메세지 전송
 
 ## 적용
@@ -390,6 +390,153 @@ public String createRefreshToken(Long userId, String email) {
 
   검색값은 Controller에서 require = false 옵션으로 받아서 위와 같은 메소드를 거쳐서 이용자가 입력했다면 BooleanExpression을 where절에 추가하고 입력하지 않았다면 null값으로 입력해서 하나의 쿼리를 동적으로 사용 할 수 있도록 설정
   
+
+</div>
+</details>
+
+<details>
+<summary>웹소켓을 이용한 채팅기능 구현 <a href="https://pshistory.tistory.com/96" target="_blank">[블로그]</a></summary>
+<div markdown="1">  
+  
+   ### 도입이유
+   번개나 정기모임등 오토바이 투어등록시 일정 등 관련한 대화를 나눌수있도록 어플리케이션 내에 채팅기능 도입
+
+   아직 별도의 프론트가 구축되어있지 않아서 접근하는 uri인 ws://localhost:8080/ws/talk 뒤에 쿼리파람방식으로 참가 할 채팅방의 id값을 'RoomId=' 로 이용자의 AccessToken을 'Autorization=' 로 입력해서 handshake 전에 uri를 파싱해서 검증 후 웹소켓 채팅방에 접근 가능하도록 설정
+   
+
+   ```
+	// WebsocketConfig.java
+
+	@Configuration  
+	@EnableWebSocket  
+	@RequiredArgsConstructor  
+	public class WebsocketConfig implements WebSocketConfigurer {  
+	  
+	    private final WebSocketHandler webSocketHandler;  
+	    private final HttpSessionHandshakeInterceptor httpSessionHandshakeInterceptor;  
+	  
+	    @Override  
+	    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {  
+	        registry.addHandler(webSocketHandler, "/ws/talk")  
+	            .addInterceptors(httpSessionHandshakeInterceptor)  
+	            .setAllowedOrigins("*");  
+	    }  
+	}
+
+   ```	
+  uri를 파싱하고 검증 할 수 있도록 addInterceptors 옵션 추가
+
+  ```
+	// CustomHandshakeInterceptor.java
+
+	@Component  
+	@RequiredArgsConstructor  
+	public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor {  
+	  
+	    private final JwtTokenProvider jwtTokenProvider;  
+	    private final TalkRoomMemberService talkRoomMemberService;  
+	  
+	    @Override  
+	    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,  
+	        WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {  
+	        Long memberId, roomId;  
+	        String accessToken, email;  
+	        try {  
+	            accessToken = jwtTokenProvider.getAccessTokenFromRequest(request);  
+	            Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);  
+	            memberId = memberInfo.get("userId", Long.class);  
+	            email = memberInfo.get("email", String.class);  
+	            roomId = getRoomIdFromRequest(request);  
+	  
+	            talkRoomMemberService.validateMemberInTalkRoom(roomId, memberId);  
+	        } catch (SecurityException | MalformedJwtException | SignatureException |  
+	                 ExpiredJwtException | NotFoundException e) {  
+	            return false;  
+	        }        
+	        attributes.put("memberId",memberId);  
+	        attributes.put("email", email);  
+	        attributes.put("roomId", roomId);  
+	  
+	        return true;  
+	    }  
+	    private Long getRoomIdFromRequest(ServerHttpRequest request) {  
+	        String query = request.getURI().getQuery();  
+	        if (query != null && query.contains("RoomId=")) {  
+	            String roomId = query.split("RoomId=")[1];  
+	            return Long.parseLong(roomId.split("&")[0]);  
+	        }        return null;  
+	    }  
+	}
+  ```
+  JwtTokenProvider와 TalkRoomMemberService 클래스를 이용해서 토큰이 정상인지 해당 회원이 채팅방에 가입된 회원인지 확인
+
+
+  ```
+	// WebsocketTalkHandler.java
+
+	    ...
+	    @Override  
+	    protected void handleTextMessage(WebSocketSession session, TextMessage message)  
+	        throws Exception {  
+	        String getPayload = message.getPayload();  
+	        sendMessage(session, getPayload, false);  
+	    }  
+	    
+	    private void sendMessage(WebSocketSession session, String msg,  
+	        boolean isConnectionEstablished) {  
+	        String memberId = session.getAttributes().get("memberId").toString();  
+	        String email = session.getAttributes().get("email").toString();  
+	        String roomId = session.getAttributes().get("roomId").toString();  
+	        TextMessage textMessage;  
+	        if (isConnectionEstablished) {  
+	            textMessage = new TextMessage(email + msg);  
+	        } else {  
+	            textMessage = new TextMessage(email + " : " + msg);  
+	        }        sessionSet.parallelStream().forEach(otherSession -> {  
+	            try {  
+	                String otherSessionRoomId = otherSession.getAttributes().get("roomId").toString();  
+	                if (otherSession.isOpen()  
+	                    && roomId.equals(otherSessionRoomId)) {  
+	                    otherSession.sendMessage(textMessage);  
+	                }            
+	            } catch (IOException e) {  
+	                throw new RuntimeException(e);  
+	            }        
+	        });  
+	        publisher.publishEvent(  
+	            new TalkAutoSaveEventDto(Long.parseLong(roomId), Long.parseLong(memberId), msg));  
+	    }  
+	    ...
+  ```
+  handshake 이후 웹소켓세션이 생기면 메세지를 발송할 때 인터셉터에서 웹소켓세션에 추가한 email을 통해서 발송자명을 설정하고 roomId를 통해서 세션안에 들어있는 이용자들중 roomId가 동일한 회원에게만 메세지 발송
+
+  memberId는 메세지를 저장할 때 사용하며 메세지 저장은 Spring Event를 이용하여 TalkHistoryService로 이벤트 발생시킴
+
+  ```
+	// TalkHistoryService.java
+	
+	...
+	    @Transactional
+	    @EventListener
+	    public void wsTalkAutoSave(TalkAutoSaveEventDto talkAutoSaveEventDto) {
+	        Long roomId = talkAutoSaveEventDto.getRoomId();
+	        Long memberId = talkAutoSaveEventDto.getMemberId();
+	        String msg = talkAutoSaveEventDto.getMsg();
+	
+	        TalkHistory talk = new TalkHistory(roomId, memberId, msg);
+	        talkHistoryRepository.save(talk);
+	    }
+	...
+  ```
+  TalkHistoryService에서는 값들을 전달받아서 DB에 채팅내용을 저장함
+
+  **같은 채팅방 일 때**
+  
+  ![같은방](https://github.com/user-attachments/assets/cd390069-2b30-4f14-8ec8-bcff3acb3261)
+
+  **다른 채팅방 일 때**
+  
+  ![다른방](https://github.com/user-attachments/assets/feab0217-278b-44ab-a426-a49ffcf5a45b)
 
 </div>
 </details>
