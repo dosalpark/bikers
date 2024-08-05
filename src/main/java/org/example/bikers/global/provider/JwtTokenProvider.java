@@ -14,6 +14,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -76,6 +77,14 @@ public class JwtTokenProvider {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    public String getAccessTokenFromRequest(ServerHttpRequest request){
+        String query = request.getURI().getQuery();
+        if (query != null && query.contains("Authorization=")) {
+            return query.split("Authorization=")[1];
         }
         return null;
     }

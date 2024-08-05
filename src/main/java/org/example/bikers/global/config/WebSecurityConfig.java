@@ -2,7 +2,7 @@ package org.example.bikers.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.member.repository.MemberRepository;
-import org.example.bikers.global.exception.CustomAccessDeniedHandler;
+import org.example.bikers.global.handler.CustomAccessDeniedHandler;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.example.bikers.global.security.AuthenticationFilter;
 import org.example.bikers.global.security.AuthorizationFilter;
@@ -75,6 +75,7 @@ public class WebSecurityConfig {
         httpSecurity.authorizeHttpRequests(
             (authorizeHttpRequests) -> authorizeHttpRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .requestMatchers("/ws/talk").permitAll()
                 .requestMatchers("/v1").permitAll()
                 .requestMatchers("/v1/members/**").permitAll()
                 .requestMatchers("/oauth/**").permitAll()
