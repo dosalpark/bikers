@@ -47,7 +47,8 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                     bikeModel.displacement,
                     bike.nickName,
                     bike.status,
-                    bike.visibility)
+                    bike.visibility,
+                    bike.examinationDate)
             ).from(bike)
             .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
             .where(
@@ -72,7 +73,8 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
                     bike.purchaseDate,
                     bike.sellDate,
                     bike.status,
-                    bike.visibility)
+                    bike.visibility,
+                    bike.examinationDate)
             ).from(bike)
             .leftJoin(bikeModel).on(bike.bikeModelId.eq(bikeModel.id))
             .where(
