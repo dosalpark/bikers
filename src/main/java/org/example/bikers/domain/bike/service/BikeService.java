@@ -94,6 +94,13 @@ public class BikeService {
         bikeRepository.save(getBike);
     }
 
+    @Transactional
+    public void createExaminationDate(Long memberId, Long bikeId, LocalDate examinationDate) {
+        Bike getBike = findByMyBike(memberId, bikeId);
+        getBike.updateExaminationDate(examinationDate);
+        bikeRepository.save(getBike);
+    }
+
     @Transactional(readOnly = true)
     public Boolean validateByMyBike(Long memberId, Long bikeId) {
         return bikeRepository.existsByMemberIdEqualsAndIdEqualsAndStatusNot(

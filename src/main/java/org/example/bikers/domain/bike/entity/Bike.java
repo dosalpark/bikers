@@ -89,4 +89,9 @@ public class Bike {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    public void updateExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
 }

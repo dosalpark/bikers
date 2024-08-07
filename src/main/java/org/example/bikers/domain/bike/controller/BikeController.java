@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikeCreateExaminationDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeSellDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeUpdateVisibilityRequestDto;
@@ -124,5 +125,19 @@ public class BikeController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PostMapping("/bikes/{bikeId}/examination-date")
+    public ResponseEntity<Void> createExaminationDate(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @RequestBody MyBikeCreateExaminationDateRequestDto requestDto) {
+        bikeService.createExaminationDate(
+            userDetails.getMember().getId(),
+            bikeId,
+            requestDto.getExaminationDate());
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
 
 }
