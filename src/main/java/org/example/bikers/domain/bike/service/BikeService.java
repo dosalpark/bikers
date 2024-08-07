@@ -95,7 +95,7 @@ public class BikeService {
     }
 
     @Transactional
-    public void createExaminationDate(Long memberId, Long bikeId, LocalDate examinationDate) {
+    public void updateExaminationDate(Long memberId, Long bikeId, LocalDate examinationDate) {
         Bike getBike = findByMyBike(memberId, bikeId);
         getBike.updateExaminationDate(examinationDate);
         bikeRepository.save(getBike);
