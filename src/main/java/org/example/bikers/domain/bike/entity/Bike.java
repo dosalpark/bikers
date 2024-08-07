@@ -51,6 +51,9 @@ public class Bike {
     @Column(nullable = false)
     private boolean visibility;
 
+    @Column
+    private LocalDate examinationDate;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
