@@ -27,5 +27,6 @@ public class MyBikeGetResponseDto {
     private LocalDate sellDate;
     private BikeStatus bikeStatus;
     private boolean visibility;
+    private LocalDate examinationDate;
 
 }

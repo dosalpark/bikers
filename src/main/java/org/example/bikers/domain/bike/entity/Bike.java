@@ -51,6 +51,9 @@ public class Bike {
     @Column(nullable = false)
     private boolean visibility;
 
+    @Column
+    private LocalDate examinationDate;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -83,6 +86,11 @@ public class Bike {
 
     public void delete() {
         this.status = BikeStatus.DELETE;
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void updateExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
         this.modifiedAt = LocalDateTime.now();
     }
 

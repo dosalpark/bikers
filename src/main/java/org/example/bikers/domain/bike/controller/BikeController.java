@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeCreateRequestDto;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
+import org.example.bikers.domain.bike.dto.MyBikeUpdateExaminationDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeSellDateRequestDto;
 import org.example.bikers.domain.bike.dto.MyBikeUpdateVisibilityRequestDto;
@@ -123,6 +124,19 @@ public class BikeController {
             bikeId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/bikes/{bikeId}/examination-date")
+    public ResponseEntity<Void> updateExaminationDate(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long bikeId,
+        @RequestBody MyBikeUpdateExaminationDateRequestDto requestDto) {
+        bikeService.updateExaminationDate(
+            userDetails.getMember().getId(),
+            bikeId,
+            requestDto.getExaminationDate());
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

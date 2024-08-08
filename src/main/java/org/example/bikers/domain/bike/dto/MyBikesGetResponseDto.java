@@ -1,5 +1,6 @@
 package org.example.bikers.domain.bike.dto;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,5 +24,6 @@ public class MyBikesGetResponseDto {
     private String nickName;
     private BikeStatus bikeStatus;
     private boolean visibility;
+    private LocalDate examinationDate;
 
 }
