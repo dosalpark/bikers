@@ -21,7 +21,10 @@ public class Notification {
     private Long id;
 
     @Column(nullable = false)
-    private Long memberId;
+    private String sender;
+
+    @Column(nullable = false)
+    private Long receiverId;
 
     @Column(nullable = false)
     private String msg;
@@ -35,8 +38,9 @@ public class Notification {
     @Column
     private LocalDateTime modifiedAt;
 
-    public Notification(Long memberId, String msg) {
-        this.memberId = memberId;
+    public Notification(String sender, Long receiverId, String msg) {
+        this.sender = sender;
+        this.receiverId = receiverId;
         this.msg = msg;
         this.isConfirm = false;
         this.createdAt = LocalDateTime.now();

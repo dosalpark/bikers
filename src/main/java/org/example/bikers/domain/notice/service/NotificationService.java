@@ -29,7 +29,8 @@ public class NotificationService {
         for (BikeExaminationDateBeforeMonthResponseDto event : EventList) {
             String msg = "보유중인 " + event.getNickName() + "의 환경검사가 가능합니다 \n"
                 + "환경검사기간은는 금일부터 두달 입니다.";
-            Notification newNotice = new Notification(event.getMemberId(), msg);
+            Notification newNotice
+                = new Notification("team.bikers@gmail.com", event.getMemberId(), msg);
             addNotification.add(newNotice);
         }
 
