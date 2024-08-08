@@ -1,9 +1,11 @@
 package org.example.bikers.domain.bike.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
+import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -15,5 +17,7 @@ public interface BikeRepositoryCustom {
 
     Slice<BikesGetResponseDto> getBikes(Pageable pageable, String name, String manufacturer,
         Integer year, String email, String status);
+
+    List<BikeExaminationDateBeforeMonthResponseDto> getBikesByNotice(LocalDate beforeMonth);
 
 }

@@ -8,10 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "notification")
+@NoArgsConstructor
 public class Notification {
 
     @Id
@@ -32,5 +34,12 @@ public class Notification {
 
     @Column
     private LocalDateTime modifiedAt;
+
+    public Notification(Long memberId, String msg) {
+        this.memberId = memberId;
+        this.msg = msg;
+        this.isConfirm = false;
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
 import org.example.bikers.domain.bike.entity.BikeStatus;
 import org.example.bikers.domain.bike.entity.QBike;
+import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
 import org.example.bikers.domain.bikeModel.entity.BikeModel;
 import org.example.bikers.domain.bikeModel.entity.Manufacturer;
 import org.example.bikers.domain.bikeModel.entity.QBikeModel;
@@ -122,6 +124,20 @@ public class BikeRepositoryImpl implements BikeRepositoryCustom {
             getBikes.remove(pageable.getPageSize());
         }
         return new SliceImpl<>(getBikes, pageable, hasNext);
+    }
+
+    public List<BikeExaminationDateBeforeMonthResponseDto> getBikesByNotice(LocalDate beforeMonth) {
+        return queryFactory.select(
+                Projections.constructor(BikeExaminationDateBeforeMonthResponseDto.class,
+                    bike.memberId,
+                    bike.nickName
+                ))
+            .from(bike)
+            .where(
+                bike.examinationDate.eq(beforeMonth),
+                bike.status.eq(BikeStatus.HOLD)
+            )
+            .fetch();
     }
 
     private BooleanExpression bikeModelNameEq(String name) {
