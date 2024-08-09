@@ -36,7 +36,7 @@ public class Notification {
     private LocalDateTime createdAt;
 
     @Column
-    private LocalDateTime modifiedAt;
+    private LocalDateTime firstReadAt;
 
     public Notification(String sender, Long receiverId, String msg) {
         this.sender = sender;
