@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto;
 import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
+import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
 import org.example.bikers.domain.notice.dto.NotificationsGetResponseDto;
 import org.example.bikers.domain.notice.entity.Notification;
 import org.example.bikers.domain.notice.repository.NotificationRepository;
@@ -27,6 +28,7 @@ public class NotificationService {
     @Value("${admin.email}")
     private String adminEmail;
 
+    @Transactional(readOnly = true)
     public Slice<NotificationsGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
         Slice<NotificationsGetResponseDto> getNotifications = notificationRepository.getNotifications(
             pageable, memberId);
@@ -34,6 +36,22 @@ public class NotificationService {
             throw new NotFoundException(ErrorCode.NOTIFICATION_EMPTY);
         }
         return getNotifications;
+    }
+
+    @Transactional
+    public NotificationGetResponseDto readNotification(Long memberId, Long notificationId) {
+        Notification getMyNotification = notificationRepository.findByIdAndReceiverId(
+                notificationId, memberId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.NO_SUCH_NOTIFICATION));
+        if (!getMyNotification.isConfirm()) {
+            getMyNotification.read();
+            notificationRepository.save(getMyNotification);
+        }
+        return NotificationGetResponseDto.builder()
+            .sender(getMyNotification.getSender())
+            .msg(getMyNotification.getMsg())
+            .createdAt(getMyNotification.getCreatedAt())
+            .build();
     }
 
     /*

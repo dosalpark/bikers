@@ -46,4 +46,9 @@ public class Notification {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void read() {
+        this.isConfirm = true;
+        this.firstReadAt = LocalDateTime.now();
+    }
+
 }
