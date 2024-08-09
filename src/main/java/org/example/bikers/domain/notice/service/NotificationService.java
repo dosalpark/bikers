@@ -7,6 +7,7 @@ import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto
 import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
 import org.example.bikers.domain.notice.entity.Notification;
 import org.example.bikers.domain.notice.repository.NotificationRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,6 +19,13 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    /*
+     * BikeService.noticeExaminationDateBeforeMonth() 실행 후 이벤트방식으로 실행됨
+     * 당일 알림을 받아야하는 사용자의 memberId와 바이크의 nickName 받아와서 Notification 객체 생성 후 저장
+     * */
     @EventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bikeExaminationDateBeforeMonthEvent(
@@ -30,7 +38,7 @@ public class NotificationService {
             String msg = "보유중인 " + event.getNickName() + "의 환경검사가 가능합니다 \n"
                 + "환경검사기간은는 금일부터 두달 입니다.";
             Notification newNotice
-                = new Notification("team.bikers@gmail.com", event.getMemberId(), msg);
+                = new Notification(adminEmail, event.getMemberId(), msg);
             addNotification.add(newNotice);
         }
 
