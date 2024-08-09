@@ -5,10 +5,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto;
 import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
+import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
 import org.example.bikers.domain.notice.entity.Notification;
 import org.example.bikers.domain.notice.repository.NotificationRepository;
+import org.example.bikers.global.exception.ErrorCode;
+import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +26,15 @@ public class NotificationService {
 
     @Value("${admin.email}")
     private String adminEmail;
+
+    public Slice<NotificationGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
+        Slice<NotificationGetResponseDto> getNotifications = notificationRepository.getNotifications(
+            pageable, memberId);
+        if (getNotifications.isEmpty()) {
+            throw new NotFoundException(ErrorCode.NOTIFICATION_EMPTY);
+        }
+        return getNotifications;
+    }
 
     /*
      * BikeService.noticeExaminationDateBeforeMonth() 실행 후 이벤트방식으로 실행됨
