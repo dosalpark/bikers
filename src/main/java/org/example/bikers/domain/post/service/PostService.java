@@ -73,7 +73,8 @@ public class PostService {
             .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
     }
 
-    private Post findByPost(Long postId) {
+    @Transactional(readOnly = true)
+    public Post findByPost(Long postId) {
         return postRepository.findPostByIdEqualsAndStatusNot(postId, PostStatus.DELETE)
             .orElseThrow(() -> new NotFoundException(NO_SUCH_POST));
     }
