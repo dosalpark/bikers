@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto;
 import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
-import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
+import org.example.bikers.domain.notice.dto.NotificationsGetResponseDto;
 import org.example.bikers.domain.notice.entity.Notification;
 import org.example.bikers.domain.notice.repository.NotificationRepository;
 import org.example.bikers.global.exception.ErrorCode;
@@ -27,8 +27,8 @@ public class NotificationService {
     @Value("${admin.email}")
     private String adminEmail;
 
-    public Slice<NotificationGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
-        Slice<NotificationGetResponseDto> getNotifications = notificationRepository.getNotifications(
+    public Slice<NotificationsGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
+        Slice<NotificationsGetResponseDto> getNotifications = notificationRepository.getNotifications(
             pageable, memberId);
         if (getNotifications.isEmpty()) {
             throw new NotFoundException(ErrorCode.NOTIFICATION_EMPTY);

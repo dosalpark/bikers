@@ -1,7 +1,7 @@
 package org.example.bikers.domain.notice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
+import org.example.bikers.domain.notice.dto.NotificationsGetResponseDto;
 import org.example.bikers.domain.notice.service.NotificationService;
 import org.example.bikers.global.dto.CommonResponseDto;
 import org.example.bikers.global.security.CustomUserDetails;
@@ -23,10 +23,10 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<CommonResponseDto<Slice<NotificationGetResponseDto>>> getNotifications(
+    public ResponseEntity<CommonResponseDto<Slice<NotificationsGetResponseDto>>> getNotifications(
         @PageableDefault Pageable pageable,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Slice<NotificationGetResponseDto> responseDto = notificationService.getNotifications(
+        Slice<NotificationsGetResponseDto> responseDto = notificationService.getNotifications(
             pageable, userDetails.getMember().getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(CommonResponseDto.success(responseDto));

@@ -4,7 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
+import org.example.bikers.domain.notice.dto.NotificationsGetResponseDto;
 import org.example.bikers.domain.notice.entity.QNotification;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -17,9 +17,9 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
     private final QNotification notification = QNotification.notification;
 
     @Override
-    public Slice<NotificationGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
-        List<NotificationGetResponseDto> getNotifications = queryFactory.select(
-                Projections.constructor(NotificationGetResponseDto.class,
+    public Slice<NotificationsGetResponseDto> getNotifications(Pageable pageable, Long memberId) {
+        List<NotificationsGetResponseDto> getNotifications = queryFactory.select(
+                Projections.constructor(NotificationsGetResponseDto.class,
                     notification.id,
                     notification.sender,
                     notification.isConfirm,
