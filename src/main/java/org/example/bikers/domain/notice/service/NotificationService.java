@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto;
 import org.example.bikers.domain.bike.service.BikeExaminationDateBeforeMonthResponseDto;
+import org.example.bikers.domain.comment.dto.CommentCreateAuthorNoticeEventDto;
 import org.example.bikers.domain.notice.dto.NotificationGetResponseDto;
 import org.example.bikers.domain.notice.dto.NotificationsGetResponseDto;
 import org.example.bikers.domain.notice.entity.Notification;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +78,20 @@ public class NotificationService {
         }
 
         notificationRepository.saveAll(addNotification);
+    }
+
+    /*
+     * CommentService.createComment() 로 comment 저장 후 이벤트방식으로 실행됨
+     * comment 작성자의 email과 post의 title, post 작성자의 memberId를 받아와서 Notification 객체 생성 후 저장
+     * */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void CommentCreateAuthorNoticeEvent(CommentCreateAuthorNoticeEventDto eventDto) {
+        String msg = eventDto.getCommentCreateEmail() + " 님이 " + eventDto.getPostTitle()
+            + " 게시물에 댓글을 작성하였습니다.";
+        Notification newNotice = new Notification(eventDto.getCommentCreateEmail(),
+            eventDto.getAuthorId(), msg);
+        notificationRepository.save(newNotice);
     }
 
 }
