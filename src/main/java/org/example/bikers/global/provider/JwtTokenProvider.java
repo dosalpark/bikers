@@ -81,14 +81,6 @@ public class JwtTokenProvider {
         return null;
     }
 
-    public String getAccessTokenFromRequest(ServerHttpRequest request){
-        String query = request.getURI().getQuery();
-        if (query != null && query.contains("Authorization=")) {
-            return query.split("Authorization=")[1];
-        }
-        return null;
-    }
-
     public String getRefreshTokenFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(REFRESH_TOKEN_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
