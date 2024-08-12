@@ -1,12 +1,10 @@
 package org.example.bikers.global.handler;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.bikers.domain.talk.service.TalkRoomMemberService;
-import org.example.bikers.global.exception.customException.NotFoundException;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -28,19 +26,15 @@ public class CustomChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT == accessor.getCommand()) {
-            try {
-                String accessToken = accessor.getFirstNativeHeader("Authorization").toString()
-                    .substring(7);
-                Long roomId = Long.valueOf(accessor.getFirstNativeHeader("RoomId"));
+            String accessToken = Objects.requireNonNull(
+                accessor.getFirstNativeHeader("Authorization")).substring(7);
+            Long roomId = Long.valueOf(
+                Objects.requireNonNull(accessor.getFirstNativeHeader("RoomId")));
 
-                jwtTokenProvider.validateToken(accessToken);
-                Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
-                Long memberId = memberInfo.get("userId", Long.class);
-                talkRoomMemberService.validateMemberInTalkRoom(roomId, memberId);
-            } catch (SecurityException | MalformedJwtException | ExpiredJwtException |
-                     NotFoundException | NullPointerException | IllegalArgumentException e) {
-                log.error("connectError: ", e);
-            }
+            jwtTokenProvider.validateToken(accessToken);
+            Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
+            Long memberId = memberInfo.get("userId", Long.class);
+            talkRoomMemberService.validateMemberInTalkRoom(roomId, memberId);
         }
 
         return message;
