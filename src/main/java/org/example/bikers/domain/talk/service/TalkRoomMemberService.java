@@ -3,7 +3,7 @@ package org.example.bikers.domain.talk.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
-import org.example.bikers.domain.talk.dto.JoinTalkRoomEventDto;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomSendEventDto;
 import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoom;
@@ -44,8 +44,8 @@ public class TalkRoomMemberService {
         TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getId(), memberId);
         talkRoomMemberRepository.save(joinTalkRoom);
 
-        String msg = memberEmail + " 님이 참여했습니다.";
-        publisher.publishEvent(new JoinTalkRoomEventDto(roomId, memberId, msg));
+        publisher.publishEvent(
+            new JoinTalkRoomSendEventDto(roomId, memberId, memberEmail));
     }
 
     @Transactional

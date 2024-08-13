@@ -2,11 +2,17 @@ package org.example.bikers.domain.talk.service;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomHistoryEventDto;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomSendEventDto;
 import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,18 @@ public class TalkService {
 
         publisher.publishEvent(
             new TalkAutoSaveEventDto(roomId, sendMemberId, msg));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void JoinNoticeSendTalk(JoinTalkRoomSendEventDto joinTalkRoomSendEventDto) {
+        String msg = joinTalkRoomSendEventDto.getMemberEmail() + " 님이 채팅방에 들어왔습니다.";
+        messagingTemplate.convertAndSend("/sub/talk-rooms/" + joinTalkRoomSendEventDto.getRoomId(),
+            msg);
+
+        publisher.publishEvent(
+            new JoinTalkRoomHistoryEventDto(joinTalkRoomSendEventDto.getRoomId(),
+                joinTalkRoomSendEventDto.getMemberId(), msg));
     }
 
 }
