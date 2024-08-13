@@ -39,7 +39,10 @@ public class TalkRoomMemberController {
     public ResponseEntity<Void> joinRoom(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody TalkRoomJoinRequestDto requestDto) {
-        talkRoomMemberService.joinRoom(userDetails.getMember().getId(), requestDto.getRoomId());
+        talkRoomMemberService.joinRoom(
+            userDetails.getMember().getId(),
+            userDetails.getMember().getEmail(),
+            requestDto.getRoomId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

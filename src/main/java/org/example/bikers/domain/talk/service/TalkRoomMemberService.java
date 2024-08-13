@@ -3,6 +3,7 @@ package org.example.bikers.domain.talk.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoom;
@@ -35,13 +36,16 @@ public class TalkRoomMemberService {
     }
 
     @Transactional
-    public void joinRoom(Long memberId, Long roomId) {
+    public void joinRoom(Long memberId, String memberEmail, Long roomId) {
         TalkRoom getRoom = talkRoomService.findByTalkRoom(roomId);
         if (talkRoomMemberRepository.existsByRoomIdAndJoinMemberId(roomId, memberId)) {
             throw new IllegalArgumentException("이미 들어가있는 톡방입니다.");
         }
         TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getId(), memberId);
         talkRoomMemberRepository.save(joinTalkRoom);
+
+        String msg = memberEmail + " 님이 참여했습니다.";
+        publisher.publishEvent(new JoinTalkRoomEventDto(roomId, memberId, msg));
     }
 
     @Transactional

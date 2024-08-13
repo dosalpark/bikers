@@ -2,6 +2,7 @@ package org.example.bikers.domain.talk.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
 import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
 import org.example.bikers.domain.talk.dto.TalkHistoryGetResponseDto;
@@ -41,6 +42,17 @@ public class TalkHistoryService {
         Long roomId = talkAutoSaveEventDto.getRoomId();
         Long memberId = talkAutoSaveEventDto.getMemberId();
         String msg = talkAutoSaveEventDto.getMsg();
+
+        TalkHistory talk = new TalkHistory(roomId, memberId, msg);
+        talkHistoryRepository.save(talk);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void joinTalkRoomNotice(JoinTalkRoomEventDto joinTalkRoomEventDto) {
+        Long roomId = joinTalkRoomEventDto.getRoomId();
+        Long memberId = joinTalkRoomEventDto.getMemberId();
+        String msg = joinTalkRoomEventDto.getMsg();
 
         TalkHistory talk = new TalkHistory(roomId, memberId, msg);
         talkHistoryRepository.save(talk);
