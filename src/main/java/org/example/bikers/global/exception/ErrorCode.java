@@ -24,7 +24,8 @@ public enum ErrorCode {
     NO_SUCH_FILE("404", "FI000002", "해당하는 파일이 없습니다."),
     TALK_ROOM_NOT_FOUND("404", "TR000001", "조회 할 톡방이 없습니다."),
     MEMBER_NOT_IN_TALK_ROOM("400", "TR000002", "가입된 톡방이 아닙니다."),
-    TALK_ROOM_EMPTY("404", "TR000003", "톡방에 저장된 메세지가 없습니다.");
+    TALK_ROOM_EMPTY("404", "TR000003", "톡방에 저장된 메세지가 없습니다."),
+    NO_SUCH_TALK_ROOM("404", "TR000004", "해당하는 톡방이 없습니다.");
 
     private final String httpStatus;
     private final String code;

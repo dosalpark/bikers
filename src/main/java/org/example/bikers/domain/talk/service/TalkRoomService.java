@@ -41,4 +41,10 @@ public class TalkRoomService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
+    public TalkRoom findByTalkRoom(Long roomId) {
+        return talkRoomRepository.findById(roomId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.NO_SUCH_TALK_ROOM));
+    }
+
 }
