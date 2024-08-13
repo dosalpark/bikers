@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.bike.dto.BikeExaminationDateBeforeMonthEventDto;
 import org.example.bikers.domain.bike.dto.BikesGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikeGetResponseDto;
 import org.example.bikers.domain.bike.dto.MyBikesGetResponseDto;
@@ -18,6 +19,7 @@ import org.example.bikers.global.exception.customException.NotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,6 +113,24 @@ public class BikeService {
         return bikeRepository.findBikeByMemberIdEqualsAndIdEqualsAndStatusNot(memberId,
             bikeId, BikeStatus.DELETE).orElseThrow(() ->
             new NotFoundException(NO_SUCH_BIKE));
+    }
+
+
+    /*
+        Scheduling
+    */
+    @Scheduled(cron = "0 0 8 * * *")
+    @Transactional(readOnly = true)
+    public void noticeExaminationDateBeforeMonth() {
+        LocalDate beforeMonth = LocalDate.now().minusMonths(1L);
+        List<BikeExaminationDateBeforeMonthResponseDto> getBikesByExaminationDateBeforeMonth =
+            bikeRepository.getBikesByNotice(beforeMonth);
+
+        if (!getBikesByExaminationDateBeforeMonth.isEmpty()) {
+            BikeExaminationDateBeforeMonthEventDto eventDto =
+                new BikeExaminationDateBeforeMonthEventDto(getBikesByExaminationDateBeforeMonth);
+            publisher.publishEvent(eventDto);
+        }
     }
 
 }

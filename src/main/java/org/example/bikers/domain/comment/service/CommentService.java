@@ -5,12 +5,15 @@ import static org.example.bikers.global.exception.ErrorCode.NO_SUCH_COMMENT;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.bikers.domain.comment.dto.CommentCreateAuthorNoticeEventDto;
 import org.example.bikers.domain.comment.dto.CommentsGetResponseDto;
 import org.example.bikers.domain.comment.entity.Comment;
 import org.example.bikers.domain.comment.entity.CommentStatus;
 import org.example.bikers.domain.comment.repository.CommentRepository;
+import org.example.bikers.domain.post.entity.Post;
 import org.example.bikers.domain.post.service.PostService;
 import org.example.bikers.global.exception.customException.NotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +23,19 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final ApplicationEventPublisher publisher;
 
     @Transactional
-    public void createComment(Long memberId, Long postId, String content) {
-        postService.validateByPost(postId);
+    public void createComment(Long memberId, String memberEmail, Long postId, String content) {
+        Post getPost = postService.findByPost(postId);
         Comment createComment = new Comment(memberId, postId, content);
         commentRepository.save(createComment);
+
+        if (getPost.getMemberId() != memberId) {
+            publisher.publishEvent(
+                new CommentCreateAuthorNoticeEventDto(getPost.getMemberId(), getPost.getTitle(),
+                    memberEmail));
+        }
     }
 
     @Transactional(readOnly = true)

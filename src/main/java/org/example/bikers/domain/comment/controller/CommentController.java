@@ -35,6 +35,7 @@ public class CommentController {
         @Valid @RequestBody CommentCreateResponseDto responseDto) {
         commentService.createComment(
             userDetails.getMember().getId(),
+            userDetails.getMember().getEmail(),
             postId,
             responseDto.getContent());
         return ResponseEntity.status(HttpStatus.CREATED).build();
