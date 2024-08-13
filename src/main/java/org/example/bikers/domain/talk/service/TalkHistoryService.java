@@ -2,7 +2,8 @@ package org.example.bikers.domain.talk.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomHistoryEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomHistoryEventDto;
 import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
 import org.example.bikers.domain.talk.dto.TalkHistoryGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkHistory;
@@ -48,10 +49,21 @@ public class TalkHistoryService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void leaveTalkRoomNotice(LeaveTalkRoomEventDto leaveTalkRoomEventDto) {
-        Long roomId = leaveTalkRoomEventDto.getRoomId();
-        Long memberId = leaveTalkRoomEventDto.getMemberId();
-        String msg = leaveTalkRoomEventDto.getMsg();
+    public void joinTalkRoomNotice(JoinTalkRoomHistoryEventDto joinTalkRoomHistoryEventDto) {
+        Long roomId = joinTalkRoomHistoryEventDto.getRoomId();
+        Long memberId = joinTalkRoomHistoryEventDto.getMemberId();
+        String msg = joinTalkRoomHistoryEventDto.getMsg();
+
+        TalkHistory talk = new TalkHistory(roomId, memberId, msg);
+        talkHistoryRepository.save(talk);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void leaveTalkRoomNotice(LeaveTalkRoomHistoryEventDto leaveTalkRoomHistoryEventDto) {
+        Long roomId = leaveTalkRoomHistoryEventDto.getRoomId();
+        Long memberId = leaveTalkRoomHistoryEventDto.getMemberId();
+        String msg = leaveTalkRoomHistoryEventDto.getMsg();
 
         TalkHistory talk = new TalkHistory(roomId, memberId, msg);
         talkHistoryRepository.save(talk);

@@ -39,7 +39,10 @@ public class TalkRoomMemberController {
     public ResponseEntity<Void> joinRoom(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody TalkRoomJoinRequestDto requestDto) {
-        talkRoomMemberService.joinRoom(userDetails.getMember().getId(), requestDto.getRoomId());
+        talkRoomMemberService.joinRoom(
+            userDetails.getMember().getId(),
+            userDetails.getMember().getEmail(),
+            requestDto.getRoomId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -47,7 +50,10 @@ public class TalkRoomMemberController {
     public ResponseEntity<Void> leaveRoom(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long roomId) {
-        talkRoomMemberService.leaveRoom(userDetails.getMember().getId(), roomId);
+        talkRoomMemberService.leaveRoom(
+            userDetails.getMember().getId(),
+            userDetails.getMember().getEmail(),
+            roomId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

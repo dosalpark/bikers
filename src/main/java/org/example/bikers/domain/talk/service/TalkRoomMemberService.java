@@ -3,8 +3,10 @@ package org.example.bikers.domain.talk.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
-import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
+import org.example.bikers.domain.talk.dto.JoinTalkRoomSendEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomSendEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
+import org.example.bikers.domain.talk.entity.TalkRoom;
 import org.example.bikers.domain.talk.entity.TalkRoomMember;
 import org.example.bikers.domain.talk.repository.TalkRoomMemberRepository;
 import org.example.bikers.global.exception.ErrorCode;
@@ -22,6 +24,7 @@ public class TalkRoomMemberService {
 
     private final TalkRoomMemberRepository talkRoomMemberRepository;
     private final ApplicationEventPublisher publisher;
+    private final TalkRoomService talkRoomService;
 
     @Transactional(readOnly = true)
     public List<MyTalkRoomGetResponseDto> getMyRooms(Long memberId) {
@@ -33,23 +36,24 @@ public class TalkRoomMemberService {
     }
 
     @Transactional
-    public void joinRoom(Long memberId, Long roomId) {
-        TalkRoomMember getRoom = talkRoomMemberRepository.findByRoomId(roomId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND));
+    public void joinRoom(Long memberId, String memberEmail, Long roomId) {
+        TalkRoom getRoom = talkRoomService.findByTalkRoom(roomId);
         if (talkRoomMemberRepository.existsByRoomIdAndJoinMemberId(roomId, memberId)) {
             throw new IllegalArgumentException("이미 들어가있는 톡방입니다.");
         }
-        TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getRoomId(), memberId);
+        TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getId(), memberId);
         talkRoomMemberRepository.save(joinTalkRoom);
+
+        publisher.publishEvent(new JoinTalkRoomSendEventDto(roomId, memberId, memberEmail));
     }
 
     @Transactional
-    public void leaveRoom(Long memberId, Long roomId) {
+    public void leaveRoom(Long memberId, String memberEmail, Long roomId) {
         TalkRoomMember getRoom = talkRoomMemberRepository.findByRoomIdAndJoinMemberId(roomId,
             memberId).orElseThrow(() -> new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND));
         talkRoomMemberRepository.delete(getRoom);
-        String msg = "님이 나갔습니다.";
-        publisher.publishEvent(new LeaveTalkRoomEventDto(roomId, memberId, msg));
+
+        publisher.publishEvent(new LeaveTalkRoomSendEventDto(roomId, memberId, memberEmail));
     }
 
     @Transactional(readOnly = true)
