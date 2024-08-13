@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.JoinTalkRoomHistoryEventDto;
 import org.example.bikers.domain.talk.dto.JoinTalkRoomSendEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomHistoryEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomSendEventDto;
 import org.example.bikers.domain.talk.dto.TalkAutoSaveEventDto;
 import org.example.bikers.global.provider.JwtTokenProvider;
 import org.springframework.context.ApplicationEventPublisher;
@@ -44,6 +46,18 @@ public class TalkService {
         publisher.publishEvent(
             new JoinTalkRoomHistoryEventDto(joinTalkRoomSendEventDto.getRoomId(),
                 joinTalkRoomSendEventDto.getMemberId(), msg));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void leaveNoticeSendTalk(LeaveTalkRoomSendEventDto leaveTalkRoomSendEventDto) {
+        String msg = leaveTalkRoomSendEventDto.getMemberEmail() + " 님이 채팅방에서 나갔습니다.";
+        messagingTemplate.convertAndSend("/sub/talk-rooms/" + leaveTalkRoomSendEventDto.getRoomId(),
+            msg);
+
+        publisher.publishEvent(
+            new LeaveTalkRoomHistoryEventDto(leaveTalkRoomSendEventDto.getRoomId(),
+                leaveTalkRoomSendEventDto.getMemberId(), msg));
     }
 
 }

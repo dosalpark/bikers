@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.bikers.domain.talk.dto.CreateRoomEventDto;
 import org.example.bikers.domain.talk.dto.JoinTalkRoomSendEventDto;
-import org.example.bikers.domain.talk.dto.LeaveTalkRoomEventDto;
+import org.example.bikers.domain.talk.dto.LeaveTalkRoomSendEventDto;
 import org.example.bikers.domain.talk.dto.MyTalkRoomGetResponseDto;
 import org.example.bikers.domain.talk.entity.TalkRoom;
 import org.example.bikers.domain.talk.entity.TalkRoomMember;
@@ -44,17 +44,16 @@ public class TalkRoomMemberService {
         TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getId(), memberId);
         talkRoomMemberRepository.save(joinTalkRoom);
 
-        publisher.publishEvent(
-            new JoinTalkRoomSendEventDto(roomId, memberId, memberEmail));
+        publisher.publishEvent(new JoinTalkRoomSendEventDto(roomId, memberId, memberEmail));
     }
 
     @Transactional
-    public void leaveRoom(Long memberId, Long roomId) {
+    public void leaveRoom(Long memberId, String memberEmail, Long roomId) {
         TalkRoomMember getRoom = talkRoomMemberRepository.findByRoomIdAndJoinMemberId(roomId,
             memberId).orElseThrow(() -> new NotFoundException(ErrorCode.TALK_ROOM_NOT_FOUND));
         talkRoomMemberRepository.delete(getRoom);
-        String msg = "님이 나갔습니다.";
-        publisher.publishEvent(new LeaveTalkRoomEventDto(roomId, memberId, msg));
+
+        publisher.publishEvent(new LeaveTalkRoomSendEventDto(roomId, memberId, memberEmail));
     }
 
     @Transactional(readOnly = true)

@@ -50,7 +50,10 @@ public class TalkRoomMemberController {
     public ResponseEntity<Void> leaveRoom(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long roomId) {
-        talkRoomMemberService.leaveRoom(userDetails.getMember().getId(), roomId);
+        talkRoomMemberService.leaveRoom(
+            userDetails.getMember().getId(),
+            userDetails.getMember().getEmail(),
+            roomId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

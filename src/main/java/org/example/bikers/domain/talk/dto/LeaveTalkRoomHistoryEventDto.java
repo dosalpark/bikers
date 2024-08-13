@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class LeaveTalkRoomEventDto {
+public class LeaveTalkRoomHistoryEventDto {
 
     private Long roomId;
     private Long memberId;
