@@ -5,8 +5,8 @@ Bike manage application
 ## 목표 (지속적으로 추가)
 * Jwt AccessToken, RefreshToken 적용 (완료)
 * post, comment, BikeModel, Bike CRUD (완료)
-* 바이크 관리(주행거리 등록, 환경검사 등)
-* 채팅기능 구현 (완료)
+* 바이크 관리(주행거리 등록, 환경검사 알림등) (완료)
+* 채팅기능 구현 및 Stomp 적용 (완료)
 * 투어 등록시 로그인시 등록 위치 기반으로 투어에 대한 알림메세지 전송
 
 ## 적용
@@ -538,5 +538,178 @@ public String createRefreshToken(Long userId, String email) {
   
   ![다른방](https://github.com/user-attachments/assets/feab0217-278b-44ab-a426-a49ffcf5a45b)
 
+</div>
+</details>
+
+<details>
+<summary>채팅기능 Stomp 적용 <a href="https://pshistory.tistory.com/97" target="_blank">[블로그]</a></summary>
+<div markdown="1">  
+  
+   ### 도입이유
+   WebSocketSeesion을 통해서 메세지를 전송하는데 백엔드에서 WebSocketSession 객체를 생성할 수 없으며,
+
+   기존에는 쿼리파람형식으로 accessToken을 노출시켜 보안상 취약하다고 생각
+   
+   ```
+	//WebsocketConfig.java
+
+	@Configuration
+	@EnableWebSocketMessageBroker
+	@RequiredArgsConstructor
+	public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+	
+	    private final ChannelInterceptor channelInterceptor;
+	
+	    @Override
+	    public void registerStompEndpoints(StompEndpointRegistry registry) {
+	        registry.addEndpoint("/ws/talk")
+	            .setAllowedOrigins("*");
+	    }
+	
+	    @Override
+	    public void configureMessageBroker(MessageBrokerRegistry registry) {
+	        registry.enableSimpleBroker("/sub");
+	        registry.setApplicationDestinationPrefixes("/pub");
+	    }
+	
+	    @Override
+	    public void configureClientInboundChannel(ChannelRegistration registration) {
+	        registration.interceptors(channelInterceptor);
+	    }
+	
+	}
+   ```
+   WebSocketConfigurer 대신 MessageBorker를 이용해서 메세지를 전달하기 떄문에 WebSocketMessageBrokerConfigurer를 상속받음
+   
+   각각의 메소드는 연결 엔트포인트설정, 발송/구독 url의 prefix 설정, 통신간 header를 인터셉터할 수 있도록 설정 하는 역할을 가지고있음
+
+   ```
+	//CustomChannelInterceptor.java
+	
+	@Slf4j
+	@Component
+	@RequiredArgsConstructor
+	public class CustomChannelInterceptor implements ChannelInterceptor {
+	
+	    private final JwtTokenProvider jwtTokenProvider;
+	    private final TalkRoomMemberService talkRoomMemberService;
+	
+	    @Override
+	    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+	        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+	
+	        if (StompCommand.CONNECT == accessor.getCommand()) {
+	            String accessToken = Objects.requireNonNull(
+	                accessor.getFirstNativeHeader("Authorization")).substring(7);
+	            Long roomId = Long.valueOf(
+	                Objects.requireNonNull(accessor.getFirstNativeHeader("RoomId")));
+	
+	            jwtTokenProvider.validateToken(accessToken);
+	            Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken);
+	            Long memberId = memberInfo.get("userId", Long.class);
+	            talkRoomMemberService.validateMemberInTalkRoom(roomId, memberId);
+	        }
+	
+	        return message;
+	    }
+	}
+   ```
+   ChannelInterceptor를 상속받아서 통신 연결시 header를 확인해서 accessToken 검증 및 해당 사용자가 채팅방에 소속되어있는지 확인
+
+   ```
+	//TalkController.java
+	
+	    ...
+	    @MessageMapping("/talk-rooms/{roomId}")
+	    public void sendTalk(TalkDto talkDto, @DestinationVariable Long roomId) {
+	        talkService.sendTalk(
+	            talkDto.getAccessToken(),
+	            talkDto.getMsg(),
+	            roomId);
+	    }
+	    ...
+	
+	//TalkService.java
+	
+	    ...
+	    public void sendTalk(String accessToken, String msg, Long roomId) {
+	        Claims memberInfo = jwtTokenProvider.getUserInfoFromAccessToken(accessToken.substring(7));
+	        Long sendMemberId = memberInfo.get("userId", Long.class);
+	        String sendMemberEmail = memberInfo.get("email", String.class);
+	
+	        messagingTemplate.convertAndSend("/sub/talk-rooms/" + roomId,
+	            sendMemberEmail + " : " + msg);
+	
+	        publisher.publishEvent(
+	            new TalkAutoSaveEventDto(roomId, sendMemberId, msg));
+	    }
+	    ...
+   ```
+   사용하는 메세지 발송 Url은 '/pub/talk-rooms/{roomId}' 로 roomId를 Url에 포함시켜서 전송
+
+   @MessageMapping 어노테이션을 통하여 /pub/talk-rooms/{roomId}로 들어오는 요청을 해당 컨트롤러에서 처리
+
+   @MessageMapping이 설정된 메소드는 @PathVariable을 사용할 수 없어서 @DestinationVariable 을 통해서 roomId를 받아옴
+
+   roomId를 topic으로 설정하여 발송시 해당 roomId를 구독하고있는 사용자에게만 메세지 전달 후 TalkHistory 객체로 생성해서 DB에 저장
+
+
+   ```
+	//1. TalkRoomMemberService.java
+	
+	    @Transactional
+	    public void joinRoom(Long memberId, String memberEmail, Long roomId) {
+	        TalkRoom getRoom = talkRoomService.findByTalkRoom(roomId);
+	        if (talkRoomMemberRepository.existsByRoomIdAndJoinMemberId(roomId, memberId)) {
+	            throw new IllegalArgumentException("이미 들어가있는 톡방입니다.");
+	        }
+	        TalkRoomMember joinTalkRoom = new TalkRoomMember(getRoom.getId(), memberId);
+	        talkRoomMemberRepository.save(joinTalkRoom);
+	
+	        publisher.publishEvent(new JoinTalkRoomSendEventDto(roomId, memberId, memberEmail));
+	    }
+	
+	//2. TalkService.java
+	
+	    @Transactional(propagation = Propagation.REQUIRES_NEW)
+	    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	    public void JoinNoticeSendTalk(JoinTalkRoomSendEventDto joinTalkRoomSendEventDto) {
+	        String msg = joinTalkRoomSendEventDto.getMemberEmail() + " 님이 채팅방에 들어왔습니다.";
+	        messagingTemplate.convertAndSend("/sub/talk-rooms/" + joinTalkRoomSendEventDto.getRoomId(),
+	            msg);
+	
+	        publisher.publishEvent(
+	            new JoinTalkRoomHistoryEventDto(joinTalkRoomSendEventDto.getRoomId(),
+	                joinTalkRoomSendEventDto.getMemberId(), msg));
+	    }
+	    
+	//3. TalkHistoryService.java
+	
+	    @Transactional(propagation = Propagation.REQUIRES_NEW)
+	    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	    public void joinTalkRoomNotice(JoinTalkRoomHistoryEventDto joinTalkRoomHistoryEventDto) {
+	        Long roomId = joinTalkRoomHistoryEventDto.getRoomId();
+	        Long memberId = joinTalkRoomHistoryEventDto.getMemberId();
+	        String msg = joinTalkRoomHistoryEventDto.getMsg();
+	
+	        TalkHistory talk = new TalkHistory(roomId, memberId, msg);
+	        talkHistoryRepository.save(talk);
+	    }
+   ```
+   채팅방에 입장 했을때 입장메세지를 전달하는 방법은 위의 코드에 작성된 순번대로 처리되며 채팅방에서 나갔을 때도 동일한 방식으로 처리
+
+   단계간 Spring Event 방식을 이용하여 처리를 진행
+
+   1. 사용자가 최초 채팅방에 참여하게되면 talk_room_members 테이블에 저장
+
+   2. 참여한 채팅방의 roomId를 구독하고 있는 사용자에게 해당 이용자가 채팅방에 입장했다는 메세지를 발송
+
+   3. 채팅방에 입장했다는 메세지를 talk_history 테이블에 저장
+
+   ![입장](https://github.com/user-attachments/assets/50b32bc6-b567-4d55-85e3-fb6228cb9f86)
+
+   ![나가기](https://github.com/user-attachments/assets/e74844c1-8eb7-470d-8b8e-4c15945d185f)
+
+   
 </div>
 </details>
