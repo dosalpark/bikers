@@ -3,18 +3,34 @@ Bike 관리 및 커뮤니티 어플리케이션
 
 ## 주요 기능
 * Bike 관리기능 제공
-* Bike 주행일지 작성 기능 제공
+* 카카오톡, Naver 로그인 기능 제공
+* 주행일지 작성 기능 제공
 * 환경검사 일정 전 알림 제공
 * 채팅방 생성 및 실시간 채팅기능 제공
 * 게시글, 댓글을 통한 커뮤니티 기능 제공
+* 이미지 업로드 기능 제공
 
+## Stacks
+* Back-End
+  - Java
+  - SpringBoot
+  - Gradle
+* 데이터베이스
+  - MySQL : 메인 데이터베이스
+  - Redis : 캐싱 (RefreshToken, Mail인증)
+* 인증 및 권한
+  - Jwt
+  - OAuth : Kakao, Naver
+* 실시간 통신
+  - WebSocket
+  - STOMP
 
 ## 목표 (지속적으로 추가)
 * Jwt AccessToken, RefreshToken 적용 (완료)
 * post, comment, BikeModel, Bike CRUD (완료)
 * 바이크 관리(주행거리 등록, 환경검사 알림등) (완료)
 * 채팅기능 구현 및 Stomp 적용 (완료)
-* 투어 등록시 로그인시 등록 위치 기반으로 투어에 대한 알림메세지 전송 (프론트엔드 구현 필요)
+* 투어 등록시 로그인시 등록 위치 기반으로 투어에 대한 알림메세지 전송
 
 ## 적용
 
