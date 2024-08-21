@@ -12,6 +12,7 @@ import org.example.bikers.domain.weather.dto.WeatherGetResponseDto;
 import org.example.bikers.domain.weather.dto.WeatherInfoGetDto;
 import org.example.bikers.domain.weather.dto.WeatherItemDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class WeatherService {
         {67, 100}, {102, 84}, {66, 103}, {62, 121}, {69, 125}, {69, 106}, {68, 100}, {63, 89},
         {51, 67}, {87, 106}, {91, 77}, {73, 134}, {52, 38}};
 
-
+    @Cacheable(value = "Weathers", cacheManager = "weatherCacheManager")
     public List<WeatherGetResponseDto> getWeathers() {
         LocalDate today = LocalDate.now();
         //기상청 단기예보시간 02시부터 3시간단위로 발표
