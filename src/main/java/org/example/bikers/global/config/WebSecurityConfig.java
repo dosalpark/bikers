@@ -80,6 +80,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/v1/members/**").permitAll()
                 .requestMatchers("/oauth/**").permitAll()
                 .requestMatchers("/mail/**").permitAll()
+                .requestMatchers("/weathers").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/v1/bike-models/{bikeModelId}")
                 .hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/v1/bike-models/{bikeModelId}").hasRole("ADMIN")
