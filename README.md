@@ -119,6 +119,140 @@ Bike 관리 및 커뮤니티 어플리케이션
 </details>
 
 <details>
+<summary>OAuth 로그인 구현 <a href="https://pshistory.tistory.com/91" target="_blank">[블로그]</a></summary>
+<div markdown="1">
+  
+  ### 적용이유
+
+  사용자 측면에서 회원가입시 정보를 일일히 입력하는 것과 같은 사이트 접근성을 낮추어 사용자의 경험개선
+  서버 측면에서 사용자의 정보를 전부 저장하지 않기 때문에 보안측면에서 이점
+  
+  동작방식
+  1. OAuth 제공자에게 사용등록 및 Client Id 생성
+  2. 사용자의 OAuth 로그인 시도
+  3. OAuth 제공자에게서 Authorization code 전달 받음
+  4. Authorization code를 통해 OAuth 제공자에게 Access Token 요청
+  5. Access Token을 전달 받은 뒤 사용자 로그인 처리
+  ![image](https://github.com/user-attachments/assets/af0423ef-f36e-4955-a6db-9ea596fd4f52)
+
+
+  ![인가코드 받기](https://github.com/user-attachments/assets/5ea6687c-19c3-4039-9be8-431d5026b3c2)
+
+  위 요청으로 등록한 RedirectUri와 ClientId, responseType을 요청으로 보내서 Authorization code 획득
+  ```
+// OauthController.java
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/oauth")
+public class OauthController {
+
+    private final OauthService oauthService;
+
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<Void> kakaoLogin(
+        @RequestParam String code,
+        HttpServletResponse response) {
+        String token = oauthService.kakaoLogin(code);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .header(JwtTokenProvider.AUTHORIZATION_HEADER, token).build();
+    }
+
+}
+
+//OauthService.java
+
+    public String kakaoLogin(String code) {
+        String kakaoToken = getTokenByKakao(code);
+        OauthMemberResponseDto responseDto = getMemberInfoByKakao(kakaoToken);
+        Member getMember = registerKakaoUserIfNeeded(responseDto.getOauthId(),
+            responseDto.getEmail());
+
+        return jwtTokenProvider.createAccessToken(getMember.getId(), getMember.getEmail());
+    }
+  ```
+
+
+  ![토큰 받기](https://github.com/user-attachments/assets/275d89d4-d10a-4814-9304-1a60e40d962f)
+
+  위 요청으로 Access Token을 받아오며, HttpStatus가 4xx, 5xx 경우 Exception 발생시킴
+  ```
+  private String getTokenByKakao(String code) {
+        URI uri = UriComponentsBuilder
+            .fromUriString("https://kauth.kakao.com")
+            .path("/oauth/token")
+            .build()
+            .toUri();
+
+        HttpHeaders header = new HttpHeaders();
+        header.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", kakaoKey);
+        body.add("client_secret", kakaoSecretKey); //발급 안했을 경우에는 생략
+        body.add("redirect_uri", kakaoRedirectUri);
+        body.add("code", code);
+
+        RequestEntity<MultiValueMap<String, String>> request = RequestEntity
+            .post(uri)
+            .headers(header)
+            .body(body);
+
+        ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+
+        if (response.getStatusCode().is4xxClientError() || response.getStatusCode()
+            .is5xxServerError()) {
+            throw new IllegalArgumentException("오류가 발생했습니다.");
+        }
+        JsonElement result = new JsonParser().parse(Objects.requireNonNull(response.getBody()));
+
+        return result.getAsJsonObject().get("access_token").getAsString();
+    }
+  ```
+
+
+  ![OAuth 제공자에게 사용자 정보 받아오기](https://github.com/user-attachments/assets/17317381-f141-42e1-b861-6f4f8a7c5e02)
+
+  Access Token을 통해서 OAuth 제공자에 등록된 사용자의 정보를 받아옴
+  ```
+private OauthMemberResponseDto getMemberInfoByKakao(String token) {
+        URI uri = UriComponentsBuilder
+            .fromUriString("https://kapi.kakao.com")
+            .path("/v2/user/me")
+            .build()
+            .toUri();
+
+        HttpHeaders header = new HttpHeaders();
+        header.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+        header.add("Authorization", "Bearer " + token);
+
+
+        RequestEntity<String> request = new RequestEntity<>(header, HttpMethod.GET, uri);
+
+        ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+        JsonElement result = new JsonParser().parse(Objects.requireNonNull(response.getBody()));
+
+        long oauthId = result.getAsJsonObject().get("id").getAsLong();
+        JsonObject kakaoAccount = result.getAsJsonObject().get("kakao_account").getAsJsonObject();
+        String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+
+        return OauthMemberResponseDto.builder()
+            .oauthId(String.valueOf(oauthId))
+            .email(email)
+            .build();
+    }
+  ```
+
+  
+  이후 OAuth 제공자에게 전달받은 고유 ID, email을 통해서 회원을 저장 및 Jwt Access Token을 발급해서 로그인 성공 처리
+
+
+</div>
+</details>
+
+<details>
 <summary>Jwt RefreshToken 적용 <a href="https://pshistory.tistory.com/93" target="_blank">[블로그]</a></summary>
 <div markdown="1">  
   
